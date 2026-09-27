@@ -1,11 +1,16 @@
 import { useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { faPhone, faEnvelope, faClipboardCheck, faLink, faArrowUp } from '@fortawesome/free-solid-svg-icons'
+import EmergencyBanner from './components/EmergencyBanner'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import { RootContextMenu, MenuCard } from './components/ContextMenu'
 import Home from './pages/Home'
 import Reviews from './pages/Reviews'
+import ServiceExplorer from './pages/ServiceExplorer'
+import MaintenancePlans from './pages/MaintenancePlans'
+import BeforeAfterPortfolio from './pages/BeforeAfterPortfolio'
+import CostEstimator from './pages/CostEstimator'
 import { initSmoothScroll } from './utils/smoothScroll'
 
 // Right-click (or long-press on touch) anywhere on the page to bring this
@@ -53,11 +58,16 @@ export default function App() {
 
   return (
     <>
+      <EmergencyBanner />
       <Header />
       <main id="top">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/reviews" element={<Reviews />} />
+          <Route path="/services-explorer" element={<ServiceExplorer />} />
+          <Route path="/maintenance-plans" element={<MaintenancePlans />} />
+          <Route path="/portfolio-transformations" element={<BeforeAfterPortfolio />} />
+          <Route path="/cost-estimator" element={<CostEstimator />} />
         </Routes>
       </main>
       <Footer />

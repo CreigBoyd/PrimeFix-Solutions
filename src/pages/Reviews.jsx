@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import StarRating from '../components/StarRating'
 import ReviewModal from '../components/ReviewModal'
 import reviews from '../data/reviews.json'
@@ -23,8 +24,40 @@ export default function Reviews() {
 
   return (
     <>
+      <style>{`
+        .rev-top-nav-bar {
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          margin-bottom: 20px;
+        }
+        .rev-home-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          color: var(--text-soft, #94a3b8);
+          text-decoration: none;
+          font-size: 0.9rem;
+          font-weight: 600;
+          transition: color 0.2s;
+        }
+        .rev-home-link:hover {
+          color: var(--teal, #128077);
+        }
+      `}</style>
+
       <section className="reviews-page">
         <div className="wrap">
+          {/* Breadcrumb Home Link */}
+          <div className="rev-top-nav-bar">
+            <Link to="/" className="rev-home-link">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+              </svg>
+              <span>Back to Home</span>
+            </Link>
+          </div>
+
           <div className="section-head center">
             <span className="kicker">Reviews</span>
             <h2>What customers say.</h2>

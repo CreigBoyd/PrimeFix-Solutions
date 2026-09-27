@@ -1,34 +1,67 @@
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import logo from '../assets/primefix-solutions-logo-dark-bg.svg'
 
-
 export default function Footer() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const isHome = location.pathname === '/'
+
+  const handleNavClick = (e, href) => {
+    e.preventDefault()
+    if (!isHome) {
+      navigate('/')
+      setTimeout(() => {
+        const target = document.querySelector(href)
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' })
+        }
+      }, 100)
+    } else {
+      const target = document.querySelector(href)
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' })
+      }
+    }
+  }
+
+  const handleBrandClick = (e) => {
+    e.preventDefault()
+    if (!isHome) {
+      navigate('/')
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
+
   return (
     <footer className="site">
       <div className="wrap">
         <div className="footer-top">
           <div className="footer-brand">
-            <img
-  src={logo}
-  alt=""
-  className="primefix-footer-logo"
-  width="42"
-  height="42"
-/>
-
-            <div>
-              <strong>PrimeFix Solutions</strong>
-              <p>Carpentry, roofing, repairs, painting, and grounds work — every trade, one team.</p>
-            </div>
+            <Link to="/" onClick={handleBrandClick} style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', textDecoration: 'none', color: 'inherit' }}>
+              <img
+                src={logo}
+                alt=""
+                className="primefix-footer-logo"
+                width="42"
+                height="42"
+              />
+              <div>
+                <strong>PrimeFix Solutions</strong>
+                <p>Carpentry, roofing, repairs, painting, and grounds work — every trade, one team.</p>
+              </div>
+            </Link>
           </div>
           <div className="footer-links">
             <div>
               <h5>Site</h5>
               <ul>
-                <li><a href="#services">Services</a></li>
-                <li><a href="#portfolio">Portfolio</a></li>
-                <li><a href="#process">Process</a></li>
-                <li><a href="#reviews">Reviews</a></li>
-                <li><a href="#contact">Contact</a></li>
+                <li><a href="#services" onClick={(e) => handleNavClick(e, '#services')}>Services</a></li>
+                <li><a href="#portfolio" onClick={(e) => handleNavClick(e, '#portfolio')}>Portfolio</a></li>
+                <li><a href="#process" onClick={(e) => handleNavClick(e, '#process')}>Process</a></li>
+                <li><Link to="/reviews">Reviews</Link></li>
+                <li><a href="#contact" onClick={(e) => handleNavClick(e, '#contact')}>Contact</a></li>
               </ul>
             </div>
             <div>

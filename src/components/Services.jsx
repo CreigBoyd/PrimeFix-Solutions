@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import ServiceModal from './ServiceModal'
 
 const SERVICES = [
@@ -9,8 +10,9 @@ const SERVICES = [
     items: ['Decks & porches', 'Trim & finish carpentry', 'Framing repairs', 'Rot & structural repair'],
     imageUrl: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&q=80&w=800',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 20l6-6m0 0l7-7a2 2 0 000-3 2 2 0 00-3 0l-7 7m3 3l-3-3m0 0L4.5 15a2 2 0 000 3l1.5 1.5a2 2 0 003 0l4.5-4.5" stroke="currentColor" strokeWidth="1.5" />
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+        <polyline points="14 2 14 8 20 8"/>
       </svg>
     ),
   },
@@ -21,8 +23,9 @@ const SERVICES = [
     items: ['Shingle repair & replacement', 'Flashing & leak repair', 'Gutter installation', 'Storm damage assessment'],
     imageUrl: 'https://images.unsplash.com/photo-1632759145351-1d592919f522?auto=format&fit=crop&q=80&w=800',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 12L12 4l9 8M6 11v9h12v-9" stroke="currentColor" strokeWidth="1.5" />
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
       </svg>
     ),
   },
@@ -33,9 +36,8 @@ const SERVICES = [
     items: ['Mowing & trimming', 'Spring & fall cleanup', 'Mulching & bed work', 'Brush & branch clearing'],
     imageUrl: 'https://images.unsplash.com/photo-1686663048931-6df69f577a2f?q=80&w=876&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D?auto=format&fit=crop&q=80&w=800',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" strokeLinejoin="round">
-        <path d="M12 3c3 2.5 5 6 5 9a5 5 0 01-10 0c0-3 2-6.5 5-9z" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M12 12v9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
       </svg>
     ),
   },
@@ -46,8 +48,8 @@ const SERVICES = [
     items: ['Drywall & interior repair', 'Doors, locks & hardware', 'Fixture installs', 'General repairs'],
     imageUrl: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&q=80&w=800',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" strokeLinejoin="round">
-        <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.8-3.8a5 5 0 01-6.8 6.8L5 21H3v-2L12.7 9.3a5 5 0 016.8-6.8l-3.8 3.8z" stroke="currentColor" strokeWidth="1.5" />
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
       </svg>
     ),
   },
@@ -58,9 +60,8 @@ const SERVICES = [
     items: ['Interior painting', 'Exterior painting & staining', 'Deck sealing', 'Trim & touch-up work'],
     imageUrl: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&q=80&w=800',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" strokeLinejoin="round">
-        <path d="M4 21l6.5-1.5L19 11a2.5 2.5 0 00-3.5-3.5L7 16l-3 5z" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M13.5 7.5l3 3" stroke="currentColor" strokeWidth="1.5" />
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
       </svg>
     ),
   },
@@ -71,8 +72,9 @@ const SERVICES = [
     items: ['Gutter cleaning', 'Winterizing', 'Spring turnover', 'Snow-load roof checks'],
     imageUrl: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&q=80&w=800',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round">
-        <path d="M12 2v20M4.5 5.5l15 13M19.5 5.5l-15 13M4 12h16" stroke="currentColor" strokeWidth="1.4" />
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
       </svg>
     ),
   },
@@ -84,35 +86,30 @@ export default function Services() {
   return (
     <section id="services">
       <style>{`
-        .service-card-interactive {
-          cursor: pointer;
-          transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
-        }
-        .service-card-interactive:hover {
-          transform: translateY(-4px);
-          border-color: var(--teal-bright);
-          box-shadow: 0 20px 40px rgba(14, 42, 56, 0.14);
-        }
-        .service-card-action {
-          margin-top: 14px;
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 0.88rem;
-          font-weight: 700;
-          color: var(--teal-deep);
-          background: none;
-          border: none;
-          padding: 0;
-          cursor: pointer;
-          transition: gap 0.2s ease, color 0.2s ease;
-        }
-        :root[data-theme="dark"] .service-card-action {
-          color: var(--teal-bright);
-        }
-        .service-card-interactive:hover .service-card-action {
-          gap: 10px;
-        }
+        .service-card-interactive { cursor: pointer; transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease; overflow: hidden; padding: 0 !important; }
+        .service-card-image-wrap { width: 100%; height: 160px; overflow: hidden; position: relative; }
+        .service-card-image-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+        .service-card-interactive:hover .service-card-image-wrap img { transform: scale(1.05); }
+        .service-card-content { padding: 24px; display: flex; flex-direction: column; flex-grow: 1; }
+        .service-card-interactive:hover { transform: translateY(-4px); border-color: var(--teal-bright); box-shadow: 0 20px 40px rgba(14, 42, 56, 0.14); }
+        .service-card-action { margin-top: 14px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; font-weight: 700; color: var(--teal-deep); background: none; border: none; padding: 0; cursor: pointer; transition: gap 0.2s ease, color 0.2s ease; }
+        :root[data-theme="dark"] .service-card-action { color: var(--teal-bright); }
+        .service-card-interactive:hover .service-card-action { gap: 10px; }
+        
+        .services-text-link-bar { margin-top: 40px; display: flex; justify-content: center; align-items: center; text-align: center; }
+        .services-text-link { display: inline-flex; align-items: center; gap: 8px; color: #ffffff; font-size: 1.05rem; font-weight: 600; text-decoration: none; transition: color 0.2s ease, gap 0.2s ease; }
+        .services-text-link:hover { color: var(--teal, #128077); gap: 12px; text-decoration: underline; text-underline-offset: 4px; }
+        
+        .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        @media(max-width: 900px) { .services-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media(max-width: 600px) { .services-grid { grid-template-columns: 1fr; } }
+        .service-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; }
+        .icon-badge { width: 44px; height: 44px; border-radius: 10px; background: rgba(18,128,119,0.1); color: var(--teal); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+        .service-card h3 { font-size: 1.25rem; margin-bottom: 10px; }
+        .service-card p { font-size: 0.9rem; margin-bottom: 16px; }
+        .service-card ul { list-style: none; padding: 0; margin: 0 0 20px 0; display: flex; flex-direction: column; gap: 6px; }
+        .service-card li { font-size: 0.85rem; color: var(--text-soft); position: relative; padding-left: 16px; }
+        .service-card li::before { content: "•"; position: absolute; left: 0; color: var(--teal); }
       `}</style>
 
       <div className="wrap">
@@ -132,28 +129,42 @@ export default function Services() {
               tabIndex={0}
               onKeyDown={(e) => e.key === 'Enter' && setActiveService(service)}
             >
-              <div className="icon-badge">{service.icon}</div>
-              <h3>{service.title}</h3>
-              <p>{service.desc}</p>
-              <ul>
-                {service.items.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
+              <div className="service-card-image-wrap">
+                <img src={service.imageUrl} alt={service.title} loading="lazy" />
+              </div>
+              <div className="service-card-content">
+                <div className="icon-badge">{service.icon}</div>
+                <h3>{service.title}</h3>
+                <p>{service.desc}</p>
+                <ul>
+                  {service.items.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
 
-              <button className="service-card-action" type="button">
-                View service details 
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                  <polyline points="12 5 19 12 12 19" />
-                </svg>
-              </button>
+                <button className="service-card-action" type="button">
+                  View service details 
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
+                </button>
+              </div>
             </div>
           ))}
         </div>
+
+        {/* White text link style navigation to the full interactive Service Explorer */}
+        <div className="services-text-link-bar">
+          <Link to="/services-explorer" className="services-text-link">
+            <span>Explore all handyman tasks &amp; custom estimate builder</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </Link>
+        </div>
       </div>
 
-      {}
       <ServiceModal 
         service={activeService} 
         isOpen={Boolean(activeService)} 

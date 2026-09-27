@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import deckImg from '../assets/portfolio-deck.jpg'
 import roofImg from '../assets/portfolio-roof.jpg'
 import yardImg from '../assets/portfolio-yard.jpg'
@@ -56,6 +57,29 @@ export default function Portfolio() {
         <p className="portfolio-note">
           Representative project examples. Send us photos of your property and we'll help plan the work it needs.
         </p>
+
+        {/* Breadcrumb Link with White Text */}
+        <div style={{ textAlign: 'center', marginTop: '36px' }}>
+          <Link
+            to="/portfolio-transformations"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              color: '#ffffff',
+              fontWeight: 600,
+              fontSize: '0.95rem',
+              textDecoration: 'none',
+              transition: 'opacity 0.2s',
+            }}
+          >
+            <span>Explore Interactive Before &amp; After Transformations</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--teal-bright, #2dd4bf)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </Link>
+        </div>
       </div>
     </section>
   )
