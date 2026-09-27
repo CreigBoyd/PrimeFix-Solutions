@@ -11,7 +11,9 @@ import ServiceExplorer from './pages/ServiceExplorer'
 import MaintenancePlans from './pages/MaintenancePlans'
 import BeforeAfterPortfolio from './pages/BeforeAfterPortfolio'
 import CostEstimator from './pages/CostEstimator'
+import FAQ from './pages/FAQ'
 import { initSmoothScroll } from './utils/smoothScroll'
+import NotFound from './pages/NotFound'
 
 const siteMenuItems = [
   {
@@ -69,6 +71,9 @@ export default function App() {
           <Route path="/maintenance-plans" element={<MaintenancePlans />} />
           <Route path="/portfolio-transformations" element={<BeforeAfterPortfolio />} />
           <Route path="/cost-estimator" element={<CostEstimator />} />
+          <Route path="/faq" element={<FAQ />} />
+          {/* Catch-all 404 Route */}
+        <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       <Footer />

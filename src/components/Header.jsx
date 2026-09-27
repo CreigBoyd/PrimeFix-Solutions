@@ -19,37 +19,11 @@ export default function Header() {
   const isHome = location.pathname === '/'
   const closeMenu = () => setMenuOpen(false)
 
-  // Handle cross-page scrolling passed via location.state
-  useEffect(() => {
-    if (isHome && location.state?.scrollTo) {
-      const targetHref = location.state.scrollTo
-      window.history.replaceState({}, document.title)
-      
-      requestAnimationFrame(() => {
-        let target = null
-        try {
-          target = document.querySelector(targetHref)
-        } catch {
-          target = document.getElementById(targetHref.replace(/^#/, ''))
-        }
-        if (target) {
-          const header = document.querySelector('header.site')
-          const offset = (header ? header.offsetHeight : 0) + 12
-          const targetY = target.getBoundingClientRect().top + (window.scrollY || window.pageYOffset) - offset
-          window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' })
-        }
-      })
-    }
-  }, [isHome, location])
-
-  // Intersection observer for navigation active states
   useEffect(() => {
     if (!isHome) return
 
     const sections = NAV_LINKS
-      .map((link) => {
-        try { return document.querySelector(link.href) } catch { return null }
-      })
+      .map((link) => document.querySelector(link.href))
       .filter(Boolean)
 
     if (!sections.length) return
@@ -69,40 +43,19 @@ export default function Header() {
     return () => observer.disconnect()
   }, [isHome])
 
-  // Close mobile drawer on Escape key press
-  useEffect(() => {
-    if (!menuOpen) return
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') setMenuOpen(false)
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [menuOpen])
-
-  // Reset menu open state on viewport resize to desktop width
-  useEffect(() => {
-    const desktopQuery = window.matchMedia('(min-width: 861px)')
-    const handleViewportChange = (event) => {
-      if (event.matches) setMenuOpen(false)
-    }
-
-    if (desktopQuery.matches) setMenuOpen(false)
-    desktopQuery.addEventListener('change', handleViewportChange)
-    return () => desktopQuery.removeEventListener('change', handleViewportChange)
-  }, [])
-
   const handleNavClick = (e, href) => {
     e.preventDefault()
     closeMenu()
     if (!isHome) {
-      navigate('/', { state: { scrollTo: href } })
+      navigate('/')
+      setTimeout(() => {
+        const targetSection = document.querySelector(href)
+        if (targetSection) {
+          targetSection.scrollIntoView({ behavior: 'smooth' })
+        }
+      }, 100)
     } else {
-      let targetSection = null
-      try {
-        targetSection = document.querySelector(href)
-      } catch {
-        targetSection = document.getElementById(href.replace(/^#/, ''))
-      }
+      const targetSection = document.querySelector(href)
       if (targetSection) {
         targetSection.scrollIntoView({ behavior: 'smooth' })
       }
@@ -124,7 +77,13 @@ export default function Header() {
     e.preventDefault()
     closeMenu()
     if (!isHome) {
-      navigate('/', { state: { scrollTo: '#contact' } })
+      navigate('/')
+      setTimeout(() => {
+        const contactSection = document.querySelector('#contact')
+        if (contactSection) {
+          contactSection.scrollIntoView({ behavior: 'smooth' })
+        }
+      }, 100)
     } else {
       const contactSection = document.querySelector('#contact')
       if (contactSection) {
@@ -132,6 +91,17 @@ export default function Header() {
       }
     }
   }
+
+  useEffect(() => {
+    const desktopQuery = window.matchMedia('(min-width: 861px)')
+    const handleViewportChange = (event) => {
+      if (event.matches) setMenuOpen(false)
+    }
+
+    if (desktopQuery.matches) setMenuOpen(false)
+    desktopQuery.addEventListener('change', handleViewportChange)
+    return () => desktopQuery.removeEventListener('change', handleViewportChange)
+  }, [])
 
   return (
     <header className="site">
@@ -164,6 +134,9 @@ export default function Header() {
           
           <Link to="/reviews" className="nav-link">
             Reviews
+          </Link>
+          <Link to="/faq" className="nav-link">
+            FAQ
           </Link>
         </nav>
 
@@ -205,6 +178,7 @@ export default function Header() {
         ))}
         
         <Link to="/reviews" onClick={closeMenu}>Reviews</Link>
+        <Link to="/faq" onClick={closeMenu}>FAQ</Link>
         <a href="tel:5550102000" onClick={closeMenu}><strong>(555) 010-2000</strong></a>
       </div>
     </header>
