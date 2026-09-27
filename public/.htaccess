@@ -1,0 +1,21 @@
+# Needed because this is a client-side-routed React app (react-router).
+# Without this, visiting /reviews directly (not by clicking a link on the
+# site) returns a 404, since there's no real /reviews file on the server —
+# the route only exists inside the JS bundle. This tells Apache: if the
+# requested file doesn't actually exist, serve index.html instead and let
+# react-router take it from there.
+#
+# Vite copies everything in /public into the root of /dist untouched, so
+# this file ends up alongside index.html after `npm run build`.
+#
+# If you're on Netlify/Vercel instead of an Apache host, delete this and
+# use their own redirect mechanism (a `_redirects` file for Netlify,
+# `vercel.json` rewrites for Vercel) instead — .htaccess does nothing there.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
