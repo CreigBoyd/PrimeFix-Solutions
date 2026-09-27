@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
+import { showToast } from '../utils/toast'
 
 const CATEGORIES = [
   {
@@ -15,7 +16,7 @@ const CATEGORIES = [
       'Changing smoke detector batteries',
       'Replace non-working outlets and plugs',
       'Changing light bulbs',
-      'Replace florescent lights with LEDs',
+      'Replace fluorescent lights with LEDs',
       'Smart home automation',
       'Plus lots more! No job is too small'
     ]
@@ -174,12 +175,13 @@ export default function ServiceExplorer() {
   const [activeTab, setActiveTab] = useState('explorer') // 'explorer' or 'calculator'
   
   // Calculator state
-  const [calcServiceType, setCalcServiceType] = useState('Electrical & Fixtures')
   const [calcQuantity, setCalcQuantity] = useState(3)
   
   const [estimateModalOpen, setEstimateModalOpen] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [copiedNotification, setCopiedNotification] = useState(false)
+  const [contactInfo, setContactInfo] = useState({ name: '', phone: '', email: '', notes: '' })
 
   const activeCategory = useMemo(() => {
     return CATEGORIES.find(c => c.id === selectedCategory) || CATEGORIES[0]
@@ -191,38 +193,111 @@ export default function ServiceExplorer() {
     return CATEGORIES.map(cat => ({
       ...cat,
       matchingTasks: cat.tasks.filter(t => t.toLowerCase().includes(term))
-    })).filter(cat => cat.title.toLowerCase().includes(term) || cat.matchingTasks.length > 0)
+    })).filter(cat => cat.title.toLowerCase().includes(term) || cat.description.toLowerCase().includes(term) || cat.matchingTasks.length > 0)
   }, [searchTerm])
 
   const toggleTaskSelection = (task) => {
-    setSelectedTasks(prev => 
-      prev.includes(task) ? prev.filter(t => t !== task) : [...prev, task]
-    )
+    setSelectedTasks(prev => {
+      const isSelected = prev.includes(task)
+      if (isSelected) {
+        showToast(`Removed "${task}"`)
+        return prev.filter(t => t !== task)
+      } else {
+        showToast(`Added "${task}" to estimate`)
+        return [...prev, task]
+      }
+    })
   }
 
-  const handleSelectAllCategory = (cat) => {
-    const tasks = cat.tasks
-    const allSelected = tasks.every(t => selectedTasks.includes(t))
+  const handleSelectAllCategory = (category) => {
+    const allSelected = category.tasks.every(t => selectedTasks.includes(t))
     if (allSelected) {
-      setSelectedTasks(prev => prev.filter(t => !tasks.includes(t)))
+      setSelectedTasks(prev => prev.filter(t => !category.tasks.includes(t)))
+      showToast(`Deselected all in ${category.title}`)
     } else {
-      const newTasks = [...selectedTasks]
-      tasks.forEach(t => {
-        if (!newTasks.includes(t)) newTasks.push(t)
-      })
-      setSelectedTasks(newTasks)
+      setSelectedTasks(prev => Array.from(new Set([...prev, ...category.tasks])))
+      showToast(`Selected all in ${category.title}`)
     }
   }
 
-  // Quick Calculator Math
-  const calcBasePrice = selectedTasks.length > 0 ? selectedTasks.length * 75 + 120 : calcQuantity * 90 + 100
+  const handleCopyChecklist = () => {
+    if (!selectedTasks.length) return
+    const text = `PrimeFix Solutions - Requested Services:\n` + selectedTasks.map(t => `• ${t}`).join('\n')
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        setCopiedNotification(true)
+        showToast('Checklist copied to clipboard!')
+        setTimeout(() => setCopiedNotification(false), 2500)
+      }).catch(() => {})
+    }
+  }
+
+  // Estimate calculations
+  const calcBasePrice = selectedTasks.length > 0 ? selectedTasks.length * 75 + 110 : calcQuantity * 85 + 95
   const lowEnd = Math.round(calcBasePrice * 0.9)
-  const highEnd = Math.round(calcBasePrice * 1.25)
+  const highEnd = Math.round(calcBasePrice * 1.2)
+
+  const handleEstimateSubmit = async (e) => {
+    e.preventDefault()
+    if (!contactInfo.name || !contactInfo.phone) {
+      alert('Please enter your name and phone number.')
+      return
+    }
+
+    setSubmitting(true)
+    try {
+      const serviceTitle = activeTab === 'explorer' 
+        ? `Service Explorer (${selectedTasks.length} task${selectedTasks.length === 1 ? '' : 's'})`
+        : `Quick Estimator (${calcQuantity} task${calcQuantity === 1 ? '' : 's'})`
+
+      const messageContent = [
+        `Estimated Price Range: $${lowEnd.toLocaleString()} – $${highEnd.toLocaleString()}`,
+        selectedTasks.length > 0 ? `Selected Tasks:\n${selectedTasks.map(t => `• ${t}`).join('\n')}` : null,
+        contactInfo.notes ? `Additional Notes:\n${contactInfo.notes}` : null
+      ].filter(Boolean).join('\n\n')
+
+      const res = await fetch('/api/send-mail.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: contactInfo.name,
+          phone: contactInfo.phone,
+          email: contactInfo.email,
+          service: serviceTitle,
+          message: messageContent
+        })
+      })
+
+      const contentType = res.headers.get('content-type') || ''
+      
+      if (!contentType.includes('application/json')) {
+        const text = await res.text()
+        console.error('Server returned non-JSON response:', text)
+        alert('Server configuration error: The PHP backend did not return valid JSON. Check server console.')
+        return
+      }
+
+      const data = await res.json()
+
+      if (res.ok && data.ok) {
+        setSubmitted(true)
+      } else {
+        alert(data.error || 'Failed to submit request. Please try calling or texting us directly.')
+      }
+    } catch (err) {
+      console.error('Estimate submission error:', err)
+      alert('Network connection error. Ensure your server environment is running PHP.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
     <div className="se-container">
       <style>{`
-        .se-container { padding: 40px 20px 60px; max-width: 1280px; margin: 0 auto; color: var(--text, #fff); }
+        .se-container { padding: 40px 20px 80px; max-width: 1280px; margin: 0 auto; color: var(--text, #fff); min-height: 85vh; }
         .se-wrap { display: flex; flex-direction: column; gap: 32px; }
         
         .se-top-nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -233,12 +308,12 @@ export default function ServiceExplorer() {
         .se-mode-btn { padding: 8px 18px; border-radius: 20px; border: none; background: transparent; color: var(--text-soft, #94a3b8); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
         .se-mode-btn.active { background: var(--teal, #128077); color: #fff; }
 
-        .se-header { text-align: center; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; align-items: center; }
-        .se-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: rgba(18, 128, 119, 0.15); color: var(--teal, #128077); border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
-        .se-pulse { width: 8px; height: 8px; background: var(--teal, #128077); border-radius: 50%; box-shadow: 0 0 0 rgba(18, 128, 119, 0.4); animation: sePulse 2s infinite; }
-        @keyframes sePulse { 0% { box-shadow: 0 0 0 0 rgba(18, 128, 119, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(18, 128, 119, 0); } 100% { box-shadow: 0 0 0 0 rgba(18, 128, 119, 0); } }
-        .se-title { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; }
-        .se-subtitle { font-size: 1rem; color: var(--text-soft, #94a3b8); line-height: 1.5; }
+        .se-header { text-align: center; max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; align-items: center; }
+        .se-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: rgba(18, 128, 119, 0.15); color: var(--teal-bright, #2dd4bf); border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+        .se-pulse { width: 8px; height: 8px; background: var(--teal-bright, #2dd4bf); border-radius: 50%; box-shadow: 0 0 0 rgba(45, 212, 191, 0.4); animation: sePulse 2s infinite; }
+        @keyframes sePulse { 0% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(45, 212, 191, 0); } 100% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0); } }
+        .se-title { font-size: 2.4rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; }
+        .se-subtitle { font-size: 1rem; color: var(--text-soft, #94a3b8); line-height: 1.55; }
         
         .se-search-box { position: relative; width: 100%; max-width: 600px; margin-top: 8px; display: flex; align-items: center; }
         .se-search-icon { position: absolute; left: 16px; font-size: 1.1rem; }
@@ -246,544 +321,355 @@ export default function ServiceExplorer() {
         .se-input:focus { border-color: var(--teal, #128077); }
         .se-clear-btn { position: absolute; right: 14px; background: none; border: none; color: var(--text-soft, #94a3b8); cursor: pointer; font-size: 0.85rem; font-weight: 600; }
         
-        /* Category Cards Grid replacing the old pills */
         .se-category-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 8px; }
         @media(max-width: 900px) { .se-category-grid { grid-template-columns: repeat(2, 1fr); } }
         @media(max-width: 600px) { .se-category-grid { grid-template-columns: 1fr; } }
 
-        .se-cat-card { background: var(--bg-card, #132231); border: 1px solid var(--border, #20364d); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px; cursor: pointer; text-align: left; transition: all 0.2s ease; position: relative; }
-        .se-cat-card:hover { border-color: var(--teal, #128077); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
-        .se-cat-card.active { background: rgba(18, 128, 119, 0.12); border-color: var(--teal, #128077); }
-        .se-cat-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
-        .se-cat-icon { font-size: 2rem; background: rgba(18, 128, 119, 0.1); padding: 8px 12px; border-radius: 10px; }
-        .se-cat-title { font-size: 1.05rem; font-weight: 700; color: var(--text, #fff); line-height: 1.3; }
-        .se-cat-desc { font-size: 0.82rem; color: var(--text-soft, #94a3b8); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .se-cat-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.78rem; color: var(--text-soft, #94a3b8); }
-        .se-cat-count-badge { background: var(--teal, #128077); color: #fff; padding: 2px 8px; border-radius: 10px; font-weight: 600; font-size: 0.75rem; }
+        .se-cat-card { background: var(--bg-card, #132231); border: 1px solid var(--border, #20364d); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px; cursor: pointer; transition: all 0.2s ease; position: relative; text-align: left; }
+        .se-cat-card:hover { border-color: var(--teal, #128077); transform: translateY(-2px); }
+        .se-cat-card.active { border-color: var(--teal-bright, #2dd4bf); background: rgba(18, 128, 119, 0.12); box-shadow: 0 8px 24px rgba(18, 128, 119, 0.15); }
+        .se-cat-card-header { display: flex; justify-content: space-between; align-items: center; }
+        .se-cat-icon { font-size: 1.6rem; }
+        .se-cat-badge { font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 10px; background: rgba(255,255,255,0.08); color: var(--teal-bright, #2dd4bf); text-transform: uppercase; }
+        .se-cat-title { font-size: 1.05rem; font-weight: 700; color: #fff; margin: 0; }
+        .se-cat-desc { font-size: 0.82rem; color: var(--text-soft, #94a3b8); line-height: 1.4; margin: 0; }
 
-        .se-main-layout { display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start; }
-        @media(max-width: 900px) { .se-main-layout { grid-template-columns: 1fr; } }
-        
-        .se-sidebar { background: var(--bg-card, #132231); border: 1px solid var(--border, #20364d); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 6px; }
-        .se-sidebar-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; font-size: 0.85rem; font-weight: 600; color: var(--text-soft, #94a3b8); border-bottom: 1px solid var(--border, #20364d); margin-bottom: 6px; }
-        .se-count-tag { background: rgba(18, 128, 119, 0.15); color: var(--teal, #128077); padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; }
-        .se-sidebar-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: transparent; border: 1px solid transparent; border-radius: 10px; color: var(--text, #fff); cursor: pointer; text-align: left; transition: all 0.2s; }
-        .se-sidebar-item:hover { background: rgba(255,255,255,0.03); }
-        .se-sidebar-item.active { background: rgba(18, 128, 119, 0.15); border-color: var(--teal, #128077); }
-        .se-sidebar-item-left { display: flex; align-items: center; gap: 12px; }
-        .se-sidebar-icon { font-size: 1.2rem; }
-        .se-sidebar-name { display: block; font-weight: 600; font-size: 0.9rem; }
-        .se-sidebar-sub { display: block; font-size: 0.75rem; color: var(--text-soft, #94a3b8); }
-        .se-arrow { color: var(--text-soft, #94a3b8); font-size: 0.9rem; }
-        .se-badge-count { background: var(--teal, #128077); color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; }
+        .se-detail-panel { background: var(--bg-card, #132231); border: 1px solid var(--border, #20364d); border-radius: 16px; padding: 32px; display: flex; flex-direction: column; gap: 24px; }
+        .se-detail-head { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; border-bottom: 1px solid var(--border, #20364d); padding-bottom: 20px; }
+        .se-task-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+        .se-task-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--bg, #0a131c); border: 1px solid var(--border, #20364d); border-radius: 10px; cursor: pointer; transition: all 0.15s; }
+        .se-task-item:hover { border-color: var(--teal, #128077); }
+        .se-task-item.selected { border-color: var(--teal-bright, #2dd4bf); background: rgba(18, 128, 119, 0.18); }
+        .se-task-checkbox { width: 18px; height: 18px; accent-color: var(--teal, #128077); cursor: pointer; }
+        .se-task-label { font-size: 0.88rem; font-weight: 500; color: #fff; cursor: pointer; }
 
-        .se-content-panel { background: var(--bg-card, #132231); border: 1px solid var(--border, #20364d); border-radius: 16px; padding: 32px; display: flex; flex-direction: column; gap: 24px; }
-        .se-panel-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; border-bottom: 1px solid var(--border, #20364d); padding-bottom: 24px; }
-        @media(max-width: 600px) { .se-panel-top { flex-direction: column; } }
-        .se-panel-heading { display: flex; gap: 16px; align-items: flex-start; }
-        .se-panel-icon { font-size: 2.5rem; background: rgba(18, 128, 119, 0.1); padding: 12px; border-radius: 12px; }
-        .se-badge-tag { display: inline-block; padding: 4px 10px; background: rgba(18, 128, 119, 0.15); color: var(--teal, #128077); border-radius: 6px; font-size: 0.75rem; font-weight: 600; margin-bottom: 6px; }
-        .se-panel-heading h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
-        .se-panel-heading p { font-size: 0.9rem; color: var(--text-soft, #94a3b8); }
-        
-        .se-select-all-btn { padding: 8px 14px; background: transparent; border: 1px solid var(--border, #20364d); border-radius: 8px; color: var(--text, #fff); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-        .se-select-all-btn:hover { border-color: var(--teal, #128077); background: rgba(18, 128, 119, 0.1); }
+        .se-sticky-bar { position: sticky; bottom: 20px; z-index: 10; background: rgba(19, 34, 49, 0.95); backdrop-filter: blur(12px); border: 1px solid var(--teal, #128077); border-radius: 16px; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; box-shadow: 0 12px 32px rgba(0,0,0,0.4); margin-top: 24px; }
+        .se-sticky-info { display: flex; flex-direction: column; gap: 2px; }
+        .se-sticky-count { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--teal-bright, #2dd4bf); font-weight: 700; }
+        .se-sticky-price { font-size: 1.3rem; font-weight: 800; color: #fff; }
+        .se-sticky-actions { display: flex; gap: 12px; align-items: center; }
 
-        .se-panel-tasks-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        @media(max-width: 600px) { .se-panel-tasks-grid { grid-template-columns: 1fr; } }
-        
-        .se-task-card-btn { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; background: rgba(255,255,255,0.02); border: 1px solid var(--border, #20364d); border-radius: 10px; color: var(--text, #fff); text-align: left; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
-        .se-task-card-btn:hover { border-color: var(--teal, #128077); background: rgba(18, 128, 119, 0.05); }
-        .se-task-card-btn.selected { background: rgba(18, 128, 119, 0.15); border-color: var(--teal, #128077); }
-        .se-task-checkbox { width: 22px; height: 22px; border: 1px solid var(--border, #20364d); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; background: rgba(0,0,0,0.1); }
-        .se-task-checkbox.checked { background: var(--teal, #128077); border-color: var(--teal, #128077); color: #fff; font-weight: bold; }
-
-        .se-callout { display: flex; justify-content: space-between; align-items: center; background: rgba(18, 128, 119, 0.08); border: 1px solid rgba(18, 128, 119, 0.3); border-radius: 12px; padding: 20px; margin-top: 12px; }
-        @media(max-width: 600px) { .se-callout { flex-direction: column; gap: 16px; align-items: stretch; text-align: center; } }
-        .se-callout-sub { font-size: 0.85rem; color: var(--text-soft, #94a3b8); margin-bottom: 2px; }
-        .se-callout-main { font-size: 1rem; font-weight: 600; }
-        .se-callout-main a { color: var(--teal, #128077); text-decoration: none; }
-
-        .se-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; background: var(--teal, #128077); color: #fff; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: opacity 0.2s; }
-        .se-btn-primary:hover { opacity: 0.9; }
-        .se-count-pill { background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 20px; font-size: 0.8rem; }
-
-        .se-floating-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: calc(100% - 40px); max-width: 800px; background: #0b1722; border: 1px solid var(--teal, #128077); border-radius: 16px; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 100; animation: seSlideUp 0.3s ease; }
-        @keyframes seSlideUp { from { transform: translate(-50%, 20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
-        .se-floating-info { display: flex; align-items: center; gap: 16px; overflow: hidden; }
-        .se-floating-count { background: var(--teal, #128077); color: #fff; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
-        .se-floating-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 2px; }
-        .se-floating-desc { font-size: 0.8rem; color: var(--text-soft, #94a3b8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 350px; }
-        .se-floating-actions { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
-        .se-link-btn { background: none; border: none; color: var(--text-soft, #94a3b8); cursor: pointer; font-size: 0.85rem; font-weight: 600; text-decoration: underline; }
-        .se-link-btn:hover { color: var(--text, #fff); }
-
-        .se-calculator-wrapper { background: var(--bg-card, #132231); border: 1px solid var(--border, #20364d); border-radius: 20px; padding: 40px; max-width: 850px; margin: 0 auto; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
-
-        .se-search-results-section { display: flex; flex-direction: column; gap: 24px; }
-        .se-results-header { display: flex; justify-content: space-between; align-items: center; }
-        .se-grid-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
-        .se-card { background: var(--bg-card, #132231); border: 1px solid var(--border, #20364d); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
-        .se-card-header { display: flex; gap: 12px; align-items: flex-start; }
-        .se-card-icon { font-size: 1.8rem; background: rgba(18, 128, 119, 0.1); padding: 8px; border-radius: 10px; }
-        .se-card-desc { font-size: 0.85rem; color: var(--text-soft, #94a3b8); }
-        .se-task-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
-        .se-task-btn { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: rgba(255,255,255,0.02); border: 1px solid var(--border, #20364d); border-radius: 8px; color: var(--text, #fff); font-size: 0.85rem; cursor: pointer; text-align: left; }
-        .se-task-btn.selected { background: rgba(18, 128, 119, 0.15); border-color: var(--teal, #128077); }
-
-        .se-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 1000; }
-        .se-modal-box { background: var(--bg-card, #132231); border: 1px solid var(--border, #20364d); border-radius: 20px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 32px; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
-        .se-modal-close { position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--text-soft, #94a3b8); font-size: 1.2rem; cursor: pointer; }
-        .se-modal-header { margin-bottom: 24px; }
-        .se-modal-header h3 { font-size: 1.5rem; font-weight: 700; margin: 6px 0 4px 0; }
-        .se-modal-header p { font-size: 0.9rem; color: var(--text-soft, #94a3b8); }
-        
-        .se-modal-task-box { background: rgba(0,0,0,0.2); border: 1px solid var(--border, #20364d); border-radius: 12px; padding: 16px; margin-bottom: 24px; }
-        .se-modal-task-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 0.9rem; font-weight: 600; }
-        .se-link-danger { background: none; border: none; color: #ef4444; font-size: 0.8rem; cursor: pointer; }
-        .se-modal-list { list-style: none; padding: 0; margin: 0; max-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
-        .se-modal-list-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(255,255,255,0.03); border-radius: 6px; font-size: 0.85rem; }
-        .se-remove-item { background: none; border: none; color: var(--text-soft, #94a3b8); cursor: pointer; font-size: 0.8rem; }
-        .se-remove-item:hover { color: #ef4444; }
-
-        .se-form { display: flex; flex-direction: column; gap: 16px; }
-        .se-form-group { display: flex; flex-direction: column; gap: 6px; }
-        .se-form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-soft, #94a3b8); }
-        .se-form-input, .se-form-textarea { width: 100%; padding: 12px 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--border, #20364d); border-radius: 10px; color: var(--text, #fff); font-size: 0.9rem; outline: none; }
-        .se-form-input:focus, .se-form-textarea:focus { border-color: var(--teal, #128077); }
-        .se-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        @media(max-width: 500px) { .se-form-row { grid-template-columns: 1fr; } }
-        .se-honeypot { display: none; }
-        .se-submit-btn { width: 100%; margin-top: 8px; }
-
-        .se-submitted-state { text-align: center; padding: 32px 0; display: flex; flex-direction: column; align-items: center; gap: 16px; }
-        .se-success-icon { width: 64px; height: 64px; background: rgba(18, 128, 119, 0.2); color: var(--teal, #128077); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; }
-        .se-submitted-state h3 { font-size: 1.5rem; font-weight: 700; }
-        .se-submitted-state p { font-size: 0.95rem; color: var(--text-soft, #94a3b8); max-width: 400px; line-height: 1.5; }
-        .se-modal-buttons { display: flex; gap: 12px; margin-top: 16px; }
-        .se-btn-secondary { padding: 12px 20px; background: transparent; border: 1px solid var(--border, #20364d); border-radius: 10px; color: var(--text, #fff); font-weight: 600; cursor: pointer; font-size: 0.9rem; }
-        .se-btn-secondary:hover { border-color: var(--teal, #128077); }
-
-        .se-footer { margin-top: 80px; padding-top: 40px; border-top: 1px solid var(--border, #20364d); text-align: center; color: var(--text-soft, #94a3b8); font-size: 0.85rem; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+        .se-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .se-modal { background: var(--bg-card, #132231); border: 1px solid var(--border, #20364d); border-radius: 20px; padding: 36px; max-width: 550px; width: 100%; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
       `}</style>
 
       <div className="se-wrap">
-        
-        {/* Top Nav Bar with Back Link & View Mode Switcher */}
+        {/* Top Navigation & Mode Switch */}
         <div className="se-top-nav-bar">
           <Link to="/" className="se-home-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M19 12H5M12 19l-7-7 7-7"/>
             </svg>
             <span>Back to Home</span>
           </Link>
 
-          {/* Mode Switcher Tabs */}
           <div className="se-mode-switch">
             <button
-              onClick={() => setActiveTab('explorer')}
+              type="button"
               className={`se-mode-btn ${activeTab === 'explorer' ? 'active' : ''}`}
+              onClick={() => setActiveTab('explorer')}
             >
-              🛠️ Service Explorer
+              Interactive Checklist
             </button>
             <button
-              onClick={() => setActiveTab('calculator')}
+              type="button"
               className={`se-mode-btn ${activeTab === 'calculator' ? 'active' : ''}`}
+              onClick={() => setActiveTab('calculator')}
             >
-              💵 Instant Cost Estimator {selectedTasks.length > 0 && `(${selectedTasks.length})`}
+              Quick Estimator
             </button>
+          </div>
+        </div>
+
+        {/* Section Header */}
+        <div className="se-header">
+          <div className="se-badge">
+            <span className="se-pulse"></span>
+            Comprehensive Service Catalog
+          </div>
+          <h1 className="se-title">Explore Services &amp; Build Your Checklist.</h1>
+          <p className="se-subtitle">
+            Select tasks across any trade to create a customized job checklist and view instant ballpark estimates.
+          </p>
+
+          {/* Search Box */}
+          <div className="se-search-box">
+            <span className="se-search-icon">🔍</span>
+            <input
+              type="text"
+              className="se-input"
+              placeholder="Search services (e.g. fan, outlet, faucet, mounting)..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && (
+              <button type="button" className="se-clear-btn" onClick={() => setSearchTerm('')}>Clear</button>
+            )}
           </div>
         </div>
 
         {activeTab === 'explorer' ? (
           <>
-            {/* Header Section */}
-            <div className="se-header">
-              <div className="se-badge">
-                <span className="se-pulse"></span>
-                Professional Home Services Explorer
-              </div>
-              <h1 className="se-title">What needs fixing around your home?</h1>
-              <p className="se-subtitle">
-                Browse through our professional handyman services or search instantly. Select any category below or search to build a custom estimate in seconds.
-              </p>
+            {/* Category Cards Grid */}
+            <div className="se-category-grid">
+              {filteredCategories.map((cat) => {
+                const isActive = selectedCategory === cat.id
+                const categorySelectedCount = cat.tasks.filter(t => selectedTasks.includes(t)).length
 
-              {/* Search Box */}
-              <div className="se-search-box">
-                <span className="se-search-icon">🔍</span>
-                <input
-                  type="text"
-                  placeholder="Search e.g. ceiling fan, drywall patch, leaking faucet..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="se-input"
-                />
-                {searchTerm && (
-                  <button onClick={() => setSearchTerm('')} className="se-clear-btn">
-                    Clear
-                  </button>
-                )}
-              </div>
+                return (
+                  <div
+                    key={cat.id}
+                    className={`se-cat-card ${isActive ? 'active' : ''}`}
+                    onClick={() => setSelectedCategory(cat.id)}
+                  >
+                    <div className="se-cat-card-header">
+                      <span className="se-cat-icon">{cat.icon}</span>
+                      {categorySelectedCount > 0 ? (
+                        <span className="se-cat-badge" style={{ background: 'var(--teal)', color: '#fff' }}>
+                          {categorySelectedCount} selected
+                        </span>
+                      ) : (
+                        <span className="se-cat-badge">{cat.badge}</span>
+                      )}
+                    </div>
+                    <h3 className="se-cat-title">{cat.title}</h3>
+                    <p className="se-cat-desc">{cat.description}</p>
+                  </div>
+                )
+              })}
             </div>
 
-            {/* Category Cards Grid replacing the old top scrollable pills */}
-            {!searchTerm && (
-              <div className="se-category-grid">
-                {CATEGORIES.map(cat => {
-                  const isActive = selectedCategory === cat.id
-                  const countSelectedInCat = cat.tasks.filter(t => selectedTasks.includes(t)).length
-                  return (
-                    <button
-                      key={cat.id}
-                      onClick={() => {
-                        setSelectedCategory(cat.id)
-                        // Smoothly scroll down or let user focus on the main layout panel below
-                      }}
-                      className={`se-cat-card ${isActive ? 'active' : ''}`}
-                    >
-                      <div className="se-cat-card-top">
-                        <span className="se-cat-icon">{cat.icon}</span>
-                        {countSelectedInCat > 0 ? (
-                          <span className="se-cat-count-badge">{countSelectedInCat} selected</span>
-                        ) : (
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-soft)' }}>{cat.badge}</span>
-                        )}
-                      </div>
-                      <div>
-                        <div className="se-cat-title">{cat.title}</div>
-                        <div className="se-cat-desc">{cat.description}</div>
-                      </div>
-                      <div className="se-cat-footer">
-                        <span>{cat.tasks.length} specific tasks</span>
-                        <span style={{ fontWeight: 600, color: isActive ? 'var(--teal-bright)' : 'inherit' }}>{isActive ? 'Viewing below ↓' : 'Select →'}</span>
-                      </div>
-                    </button>
-                  )
-                })}
-              </div>
-            )}
+            {/* Active Category Tasks Explorer */}
+            {activeCategory && (
+              <div className="se-detail-panel">
+                <div className="se-detail-head">
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '1.8rem' }}>{activeCategory.icon}</span>
+                      <h2 style={{ fontSize: '1.4rem', margin: 0 }}>{activeCategory.title}</h2>
+                    </div>
+                    <p style={{ fontSize: '0.88rem', color: 'var(--text-soft)', margin: 0 }}>{activeCategory.description}</p>
+                  </div>
 
-            {/* Conditional Search Grid vs Sidebar Layout */}
-            {searchTerm ? (
-              <div className="se-search-results-section">
-                <div className="se-results-header">
-                  <h2>Search Results for "{searchTerm}"</h2>
-                  <button onClick={() => setSearchTerm('')} className="se-link-btn">
-                    Reset search & view categories
+                  <button
+                    type="button"
+                    onClick={() => handleSelectAllCategory(activeCategory)}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border)',
+                      background: 'var(--bg, #0a131c)',
+                      color: 'var(--text)',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {activeCategory.tasks.every(t => selectedTasks.includes(t)) ? 'Deselect All in Category' : 'Select All in Category'}
                   </button>
                 </div>
 
-                {filteredCategories.length === 0 ? (
-                  <div className="se-empty-state" style={{ textAlign: 'center', padding: '40px 0' }}>
-                    <p style={{ fontSize: '2rem' }}>🔍</p>
-                    <h3>No matching services found</h3>
-                    <p style={{ color: 'var(--text-soft)', margin: '8px 0 16px' }}>Try searching for a different keyword or browse our main categories.</p>
-                    <button onClick={() => setSearchTerm('')} className="se-btn-primary">
-                      View All Categories
-                    </button>
-                  </div>
-                ) : (
-                  <div className="se-grid-results">
-                    {filteredCategories.map(cat => {
-                      const tasksToShow = cat.matchingTasks || cat.tasks
-                      return (
-                        <div key={cat.id} className="se-card">
-                          <div className="se-card-header">
-                            <span className="se-card-icon">{cat.icon}</span>
-                            <div>
-                              <h3>{cat.title}</h3>
-                              <span className="se-badge-tag">{cat.badge}</span>
-                            </div>
-                          </div>
-                          <p className="se-card-desc">{cat.description}</p>
-                          <ul className="se-task-list">
-                            {tasksToShow.map((task, idx) => {
-                              const isSelected = selectedTasks.includes(task)
-                              return (
-                                <li key={idx}>
-                                  <button
-                                    onClick={() => toggleTaskSelection(task)}
-                                    className={`se-task-btn ${isSelected ? 'selected' : ''}`}
-                                  >
-                                    <span>{task}</span>
-                                    <span className={`se-task-checkbox ${isSelected ? 'checked' : ''}`}>
-                                      {isSelected ? '✓' : '+'}
-                                    </span>
-                                  </button>
-                                </li>
-                              )
-                            })}
-                          </ul>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="se-main-layout">
-                
-                {/* Sidebar list */}
-                <div className="se-sidebar">
-                  <div className="se-sidebar-header">
-                    <span>Quick Jump Category</span>
-                    <span className="se-count-tag">{CATEGORIES.length} Available</span>
-                  </div>
-                  {CATEGORIES.map(cat => {
-                    const isSelected = selectedCategory === cat.id
-                    const selectedInCat = cat.tasks.filter(t => selectedTasks.includes(t)).length
+                <div className="se-task-grid">
+                  {activeCategory.tasks.map((task) => {
+                    const isSelected = selectedTasks.includes(task)
                     return (
-                      <button
-                        key={cat.id}
-                        onClick={() => setSelectedCategory(cat.id)}
-                        className={`se-sidebar-item ${isSelected ? 'active' : ''}`}
+                      <div
+                        key={task}
+                        className={`se-task-item ${isSelected ? 'selected' : ''}`}
+                        onClick={() => toggleTaskSelection(task)}
                       >
-                        <div className="se-sidebar-item-left">
-                          <span className="se-sidebar-icon">{cat.icon}</span>
-                          <div>
-                            <span className="se-sidebar-name">{cat.title}</span>
-                            <span className="se-sidebar-sub">{cat.tasks.length} tasks included</span>
-                          </div>
-                        </div>
-                        {selectedInCat > 0 ? (
-                          <span className="se-badge-count">{selectedInCat}</span>
-                        ) : (
-                          <span className="se-arrow">→</span>
-                        )}
-                      </button>
+                        <input
+                          type="checkbox"
+                          className="se-task-checkbox"
+                          checked={isSelected}
+                          onChange={() => {}}
+                        />
+                        <span className="se-task-label">{task}</span>
+                      </div>
                     )
                   })}
                 </div>
+              </div>
+            )}
 
-                {/* Main Active Category Display */}
-                <div className="se-content-panel">
-                  <div className="se-panel-top">
-                    <div className="se-panel-heading">
-                      <span className="se-panel-icon">{activeCategory.icon}</span>
-                      <div>
-                        <span className="se-badge-tag">{activeCategory.badge}</span>
-                        <h2>{activeCategory.title}</h2>
-                        <p>{activeCategory.description}</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleSelectAllCategory(activeCategory)}
-                      className="se-select-all-btn"
-                    >
-                      {activeCategory.tasks.every(t => selectedTasks.includes(t)) ? 'Deselect All' : 'Select All in Category'}
-                    </button>
-                  </div>
-
-                  <div className="se-panel-tasks-grid">
-                    {activeCategory.tasks.map((task, idx) => {
-                      const isSelected = selectedTasks.includes(task)
-                      return (
-                        <button
-                          key={idx}
-                          onClick={() => toggleTaskSelection(task)}
-                          className={`se-task-card-btn ${isSelected ? 'selected' : ''}`}
-                        >
-                          <span>{task}</span>
-                          <span className={`se-task-checkbox ${isSelected ? 'checked' : ''}`}>
-                            {isSelected ? '✓' : '+'}
-                          </span>
-                        </button>
-                      )
-                    })}
-                  </div>
-
-                  {/* Bottom Callout */}
-                  <div className="se-callout">
-                    <div>
-                      <p className="se-callout-sub">Ready to calculate pricing for your tasks?</p>
-                      <p className="se-callout-main">
-                        You have <strong style={{ color: 'var(--teal-bright)' }}>{selectedTasks.length} tasks</strong> selected.
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => setActiveTab('calculator')}
-                      className="se-btn-primary"
-                    >
-                      <span>Open Cost Calculator</span>
-                      <span>→</span>
-                    </button>
+            {/* Sticky Checklist Summary Drawer */}
+            {selectedTasks.length > 0 && (
+              <div className="se-sticky-bar">
+                <div className="se-sticky-info">
+                  <span className="se-sticky-count">{selectedTasks.length} task{selectedTasks.length === 1 ? '' : 's'} selected in your checklist</span>
+                  <div className="se-sticky-price">
+                    Est. ${lowEnd.toLocaleString()} –${highEnd.toLocaleString()}
                   </div>
                 </div>
 
+                <div className="se-sticky-actions">
+                  <button
+                    type="button"
+                    onClick={handleCopyChecklist}
+                    style={{
+                      padding: '10px 16px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border)',
+                      background: 'var(--bg)',
+                      color: '#fff',
+                      fontSize: '0.88rem',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {copiedNotification ? '✓ Copied!' : 'Copy List'}
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => setEstimateModalOpen(true)}
+                    style={{ padding: '10px 20px', fontWeight: 700 }}
+                  >
+                    Request Free Quote ({selectedTasks.length})
+                  </button>
+                </div>
               </div>
             )}
           </>
         ) : (
-          /* Calculator Tab View */
-          <div className="se-calculator-wrapper">
-            <div className="section-head" style={{ textAlign: 'center', marginBottom: '32px' }}>
-              <span className="kicker">Instant Project Estimator</span>
-              <h2>Your custom ballpark estimate range.</h2>
-              <p>Calculated dynamically from the handyman tasks you selected in the explorer.</p>
+          /* Quick Estimator Tab */
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '20px', padding: '40px', maxWidth: '750px', margin: '0 auto', width: '100%' }}>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>Instant Task Quantity Calculator</h2>
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-soft)', marginBottom: '32px' }}>
+              Slide to select the total number of small repairs or installations you need completed during a single visit.
+            </p>
+
+            <div style={{ background: 'var(--bg, #0a131c)', padding: '24px', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '32px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Total Tasks / Fixtures</span>
+                <span style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--teal-bright)' }}>{calcQuantity} item{calcQuantity === 1 ? '' : 's'}</span>
+              </div>
+
+              <input
+                type="range"
+                min="1"
+                max="15"
+                value={calcQuantity}
+                onChange={(e) => setCalcQuantity(Number(e.target.value))}
+                style={{ width: '100%', accentColor: 'var(--teal)', cursor: 'pointer', marginBottom: '8px' }}
+              />
             </div>
 
-            {selectedTasks.length > 0 ? (
-              <div style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border)', borderRadius: '12px', padding: '20px', marginBottom: '32px' }}>
-                <h4 style={{ fontSize: '0.9rem', marginBottom: '12px', color: 'var(--teal-bright)' }}>Selected Tasks Included in Estimate ({selectedTasks.length}):</h4>
-                <ul style={{ paddingLeft: '20px', fontSize: '0.88rem', color: 'var(--text-soft)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  {selectedTasks.map((t, i) => <li key={i}>{t}</li>)}
-                </ul>
-              </div>
-            ) : (
-              <div style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border)', borderRadius: '12px', padding: '20px', marginBottom: '32px' }}>
-                <p style={{ fontSize: '0.9rem', color: 'var(--text-soft)', textAlign: 'center' }}>
-                  No tasks selected yet. Use the slider below or <button onClick={() => setActiveTab('explorer')} style={{ background: 'none', border: 'none', color: 'var(--teal-bright)', cursor: 'pointer', textDecoration: 'underline' }}>go back to select tasks</button>.
-                </p>
-                <div style={{ marginTop: '16px' }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px' }}>Estimated Hours / Scope of Work: {calcQuantity} hrs</label>
-                  <input
-                    type="range"
-                    min="1"
-                    max="15"
-                    value={calcQuantity}
-                    onChange={(e) => setCalcQuantity(Number(e.target.value))}
-                    style={{ width: '100%', accentColor: 'var(--teal)' }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Live Price Box */}
             <div style={{ background: 'linear-gradient(135deg, rgba(18,128,119,0.15), rgba(14,90,84,0.3))', border: '2px solid var(--teal)', borderRadius: '14px', padding: '28px', textAlign: 'center', marginBottom: '32px' }}>
-              <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--teal-bright)', fontWeight: 700 }}>Estimated Investment Range</span>
+              <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--teal-bright)', fontWeight: 700 }}>Combined Service Estimate</span>
               <div style={{ fontSize: '2.5rem', fontWeight: 900, color: '#fff', margin: '8px 0' }}>
                 ${lowEnd.toLocaleString()} –${highEnd.toLocaleString()}
               </div>
-              <p style={{ fontSize: '0.82rem', color: 'var(--text-soft)', maxWidth: '500px', margin: '0 auto' }}>
-                *Includes professional labor, standard hardware, and our satisfaction guarantee. Final on-site quotes are always free.
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-soft)', margin: 0 }}>
+                Includes standard trip, tools, and labor for {calcQuantity} handyman tasks.
               </p>
             </div>
 
-            <div style={{ textAlign: 'center' }}>
-              <button
-                onClick={() => setEstimateModalOpen(true)}
-                className="se-btn-primary"
-                style={{ padding: '14px 32px', fontSize: '1rem', fontWeight: 700 }}
-              >
-                Lock In This Estimate &amp; Request Free Quote →
-              </button>
-            </div>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => setEstimateModalOpen(true)}
+              style={{ width: '100%', padding: '14px', fontWeight: 700, fontSize: '1rem', cursor: 'pointer' }}
+            >
+              Lock In This Estimate &amp; Schedule
+            </button>
           </div>
         )}
-
-        {/* Floating Bottom Bar */}
-        {selectedTasks.length > 0 && activeTab === 'explorer' && (
-          <div className="se-floating-bar">
-            <div className="se-floating-info">
-              <span className="se-floating-count">{selectedTasks.length}</span>
-              <div>
-                <p className="se-floating-title">Tasks added to your estimate</p>
-                <p className="se-floating-desc">{selectedTasks.join(', ')}</p>
-              </div>
-            </div>
-            <div className="se-floating-actions">
-              <button onClick={() => setSelectedTasks([])} className="se-link-btn">
-                Clear all
-              </button>
-              <button onClick={() => setActiveTab('calculator')} className="se-btn-primary">
-                <span>Calculate Cost ($)</span>
-                <span>→</span>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Estimate Modal */}
-        {estimateModalOpen && (
-          <div className="se-modal-backdrop">
-            <div className="se-modal-box">
-              <button 
-                onClick={() => setEstimateModalOpen(false)}
-                className="se-modal-close"
-              >
-                ✕
-              </button>
-
-              {submitted ? (
-                <div className="se-submitted-state">
-                  <div className="se-success-icon">✓</div>
-                  <h3>Estimate Request Submitted!</h3>
-                  <p>
-                    We've received your list of <strong>{selectedTasks.length || calcQuantity + ' hrs of'} tasks</strong>. Our team will review your project and get back to you with a transparent quote within 24 hours.
-                  </p>
-                  <div className="se-modal-buttons">
-                    <button
-                      onClick={() => {
-                        const textSummary = `PrimeFix Estimate Request:\n- ` + (selectedTasks.length > 0 ? selectedTasks.join('\n- ') : `${calcQuantity} hours of handyman work`);
-                        navigator.clipboard.writeText(textSummary);
-                        setCopiedNotification(true);
-                        setTimeout(() => setCopiedNotification(false), 3000);
-                      }}
-                      className="se-btn-secondary"
-                    >
-                      {copiedNotification ? '✓ Copied Summary!' : '📋 Copy Task List'}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setSubmitted(false)
-                        setSelectedTasks([])
-                        setEstimateModalOpen(false)
-                        setActiveTab('explorer')
-                      }}
-                      className="se-btn-primary"
-                    >
-                      Done & Close
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <div className="se-modal-header">
-                    <span className="se-badge-tag">Secure Quote Request</span>
-                    <h3>Request Your Free Estimate</h3>
-                    <p>Review your estimated range (${lowEnd.toLocaleString()} –${highEnd.toLocaleString()}) and enter your contact details.</p>
-                  </div>
-
-                  <form 
-                    onSubmit={(e) => {
-                      e.preventDefault()
-                      setSubmitted(true)
-                    }}
-                    className="se-form"
-                  >
-                    <div className="se-form-group">
-                      <label>Your Full Name *</label>
-                      <input required type="text" placeholder="e.g., Sarah Jenkins" className="se-form-input" />
-                    </div>
-                    <div className="se-form-row">
-                      <div className="se-form-group">
-                        <label>Phone Number *</label>
-                        <input required type="tel" placeholder="(555) 000-0000" className="se-form-input" />
-                      </div>
-                      <div className="se-form-group">
-                        <label>Email Address</label>
-                        <input type="email" placeholder="sarah@example.com" className="se-form-input" />
-                      </div>
-                    </div>
-                    <div className="se-form-group">
-                      <label>Project Details or Preferred Timing</label>
-                      <textarea rows="3" placeholder="Let us know any specific details about your home repair needs..." className="se-form-textarea"></textarea>
-                    </div>
-
-                    <input type="text" name="company_website" className="se-honeypot" tabIndex="-1" autoComplete="off" />
-
-                    <button type="submit" className="se-btn-primary se-submit-btn">
-                      <span>Submit Estimate Request</span>
-                      <span>→</span>
-                    </button>
-                  </form>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
       </div>
+
+      {/* Quote Request Modal */}
+      {estimateModalOpen && (
+        <div className="se-modal-backdrop" onClick={() => setEstimateModalOpen(false)}>
+          <div className="se-modal" onClick={(e) => e.stopPropagation()}>
+            {!submitted ? (
+              <form onSubmit={handleEstimateSubmit}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                  <h3 style={{ fontSize: '1.3rem', margin: 0 }}>Request Your Free Quote</h3>
+                  <button type="button" onClick={() => setEstimateModalOpen(false)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
+                </div>
+
+                {selectedTasks.length > 0 && (
+                  <div style={{ background: 'var(--bg, #0a131c)', border: '1px solid var(--border)', padding: '12px 16px', borderRadius: '10px', marginBottom: '20px', maxHeight: '120px', overflowY: 'auto' }}>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--teal-bright)', fontWeight: 700, display: 'block', marginBottom: '4px' }}>SELECTED TASKS ({selectedTasks.length}):</span>
+                    <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '0.82rem', color: 'var(--text-soft)' }}>
+                      {selectedTasks.map(t => <li key={t}>{t}</li>)}
+                    </ul>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '20px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '4px' }}>Name *</label>
+                    <input
+                      type="text"
+                      placeholder="Jane Doe"
+                      value={contactInfo.name}
+                      onChange={(e) => setContactInfo({ ...contactInfo, name: e.target.value })}
+                      style={{ width: '100%', padding: '10px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '8px', color: '#fff' }}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '4px' }}>Phone Number *</label>
+                    <input
+                      type="tel"
+                      placeholder="(555) 000-0000"
+                      value={contactInfo.phone}
+                      onChange={(e) => setContactInfo({ ...contactInfo, phone: e.target.value })}
+                      style={{ width: '100%', padding: '10px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '8px', color: '#fff' }}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '4px' }}>Email Address</label>
+                    <input
+                      type="email"
+                      placeholder="jane@example.com"
+                      value={contactInfo.email}
+                      onChange={(e) => setContactInfo({ ...contactInfo, email: e.target.value })}
+                      style={{ width: '100%', padding: '10px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '8px', color: '#fff' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '4px' }}>Additional Notes (Optional)</label>
+                    <textarea
+                      placeholder="Any specific instructions or details..."
+                      value={contactInfo.notes}
+                      onChange={(e) => setContactInfo({ ...contactInfo, notes: e.target.value })}
+                      style={{ width: '100%', padding: '10px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '8px', color: '#fff', height: '70px' }}
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="btn btn-primary"
+                  style={{ width: '100%', padding: '12px', fontWeight: 700, cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1 }}
+                >
+                  {submitting ? 'Submitting...' : 'Submit Request'}
+                </button>
+              </form>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                <h3 style={{ fontSize: '1.6rem', color: 'var(--teal-bright)', marginBottom: '12px' }}>Request Received! 🎉</h3>
+                <p style={{ fontSize: '0.95rem', color: 'var(--text-soft)', lineHeight: 1.5, marginBottom: '20px' }}>
+                  Thanks <strong>{contactInfo.name}</strong>! We have received your request. Our team will contact you at <strong>{contactInfo.phone}</strong> within 24 hours.
+                </p>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => { setEstimateModalOpen(false); setSubmitted(false); }}
+                  style={{ padding: '10px 20px', cursor: 'pointer' }}
+                >
+                  Close Window
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

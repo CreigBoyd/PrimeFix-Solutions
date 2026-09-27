@@ -55,8 +55,9 @@ export default function MaintenancePlans() {
   const [selectedTier, setSelectedTier] = useState(TIERS[1])
   const [selectedAddons, setSelectedAddons] = useState([])
   const [frequency, setFrequency] = useState('monthly') // monthly | annual (15% discount)
+  const [submitting, setSubmitting] = useState(false)
   const [subscribed, setSubscribed] = useState(false)
-  const [clientInfo, setClientInfo] = useState({ name: '', phone: '', address: '' })
+  const [clientInfo, setClientInfo] = useState({ name: '', phone: '', email: '', address: '' })
 
   const toggleAddon = (addon) => {
     if (selectedAddons.find(a => a.id === addon.id)) {
@@ -70,13 +71,37 @@ export default function MaintenancePlans() {
   const rawBase = selectedTier.price + addonsTotal
   const finalPrice = frequency === 'annual' ? Math.round(rawBase * 0.85) : rawBase
 
-  const handleSubscribe = (e) => {
+  const handleSubscribe = async (e) => {
     e.preventDefault()
     if (!clientInfo.name || !clientInfo.phone || !clientInfo.address) {
       alert('Please fill out all contact details to activate your plan.')
       return
     }
-    setSubscribed(true)
+
+    setSubmitting(true)
+    try {
+      const formData = new FormData()
+      formData.append('form_type', 'Maintenance Plan Activation')
+      formData.append('tier', selectedTier.name)
+      formData.append('frequency', frequency)
+      formData.append('monthlyPrice', `$${finalPrice} / ${frequency === 'annual' ? 'mo (billed annually)' : 'month'}`)
+      formData.append('addons', selectedAddons.map(a => a.name).join(', ') || 'None')
+      formData.append('name', clientInfo.name)
+      formData.append('phone', clientInfo.phone)
+      formData.append('email', clientInfo.email || '')
+      formData.append('address', clientInfo.address)
+
+      await fetch('send-mail.php', {
+        method: 'POST',
+        body: formData
+      })
+      setSubscribed(true)
+    } catch (err) {
+      console.error(err)
+      setSubscribed(true)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -213,9 +238,9 @@ export default function MaintenancePlans() {
               </div>
 
               <form onSubmit={handleSubscribe} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>Your Name</label>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>Your Name *</label>
                     <input
                       type="text"
                       placeholder="Jane Smith"
@@ -226,7 +251,7 @@ export default function MaintenancePlans() {
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>Phone Number</label>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>Phone Number *</label>
                     <input
                       type="tel"
                       placeholder="(555) 000-0000"
@@ -236,9 +261,19 @@ export default function MaintenancePlans() {
                       required
                     />
                   </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>Email Address</label>
+                    <input
+                      type="email"
+                      placeholder="jane@example.com"
+                      value={clientInfo.email}
+                      onChange={(e) => setClientInfo({ ...clientInfo, email: e.target.value })}
+                      style={{ width: '100%', padding: '12px', background: 'var(--bg, #0a131c)', border: '1px solid var(--border)', borderRadius: '8px', color: '#fff', outline: 'none' }}
+                    />
+                  </div>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>Property Address</label>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>Property Address *</label>
                   <input
                     type="text"
                     placeholder="123 Oak St, City, State"
@@ -249,8 +284,13 @@ export default function MaintenancePlans() {
                   />
                 </div>
 
-                <button type="submit" className="btn btn-primary" style={{ padding: '14px', fontWeight: 700, fontSize: '1rem', cursor: 'pointer', marginTop: '10px' }}>
-                  Activate Maintenance Plan
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="btn btn-primary"
+                  style={{ padding: '14px', fontWeight: 700, fontSize: '1rem', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1, marginTop: '10px' }}
+                >
+                  {submitting ? 'Activating Plan...' : 'Activate Maintenance Plan'}
                 </button>
               </form>
             </div>
@@ -259,7 +299,7 @@ export default function MaintenancePlans() {
           <div style={{ textAlign: 'center', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '48px', maxWidth: '600px', margin: '0 auto' }}>
             <h3 style={{ fontSize: '1.8rem', color: 'var(--teal-bright)', marginBottom: '16px' }}>Welcome to Regular Care! 🎉</h3>
             <p style={{ fontSize: '1rem', color: 'var(--text-soft)', lineHeight: 1.6, marginBottom: '24px' }}>
-              Thank you, <strong>{clientInfo.name}</strong>. Your membership for <strong>{selectedTier.name}</strong> has been registered. We will call you at <strong>{clientInfo.phone}</strong> to coordinate your initial property walkthrough at {clientInfo.address}.
+              Thank you, <strong>{clientInfo.name}</strong>. Your membership request for <strong>{selectedTier.name}</strong> has been registered. We will call you at <strong>{clientInfo.phone}</strong> to coordinate your initial property walkthrough at {clientInfo.address}.
             </p>
             <button type="button" onClick={() => setSubscribed(false)} className="btn btn-primary" style={{ padding: '12px 24px', cursor: 'pointer' }}>
               Configure Another Plan

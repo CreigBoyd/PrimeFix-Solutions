@@ -507,6 +507,7 @@ const List = styled.ul`
 
 function MenuItemRenderer(item) {
 	switch (item.menuItemType) {
+		case 'separator':
 		case 'seperator':
 			return <Separator />
 		case 'checkbox':
@@ -521,25 +522,6 @@ function MenuItemRenderer(item) {
 	}
 }
 
-/**
- * MenuCard props:
- * - items: array of menu item descriptors — see menuItemType below
- * - size: base rem size driving the whole menu's scale (font, icons, padding)
- * - holdMsDefault: default hold duration passed down as --mc-hold (used by hold_down_button items)
- * - maxWidthRem: cap on the menu's width
- * - enableTextSelection:
- *    true (default): selection unchanged
- *    false: disable selection globally (body)
- *    HTMLElement | ref | selector string: disable selection on those targets
- *    Array of the above: disable selection on multiple targets
- *
- * Each item in `items` is one of:
- *   { menuItemType: 'button', labelText, icon: { faIcon }, textColor?, onClick }
- *   { menuItemType: 'checkbox', labelText, icon: { uncheckedFaIcon, checkedFaIcon }, defaultChecked?, onCheckedChange?, checkedLabelText? }
- *   { menuItemType: 'hold_down_button', labelText, icon, holdMs?, holdLabelText?, onHoldComplete, textColor? }
- *   { menuItemType: 'exit_toggler', labelText, icon, confirmIcon, cancelIcon, defaultValue?, onConfirm, onCancel }
- *   { menuItemType: 'seperator' }
- */
 export function MenuCard({ items, size = 1.0, holdMsDefault = 2500, maxWidthRem = 20, enableTextSelection = true }) {
 	const cardSize = useMemo(() => `${size}rem`, [size])
 	const lockGlobal = useTextSelectionPolicy(enableTextSelection)

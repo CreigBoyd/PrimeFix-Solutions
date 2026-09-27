@@ -9,15 +9,14 @@ export default function Footer() {
   const handleNavClick = (e, href) => {
     e.preventDefault()
     if (!isHome) {
-      navigate('/')
-      setTimeout(() => {
-        const target = document.querySelector(href)
-        if (target) {
-          target.scrollIntoView({ behavior: 'smooth' })
-        }
-      }, 100)
+      navigate('/', { state: { scrollTo: href } })
     } else {
-      const target = document.querySelector(href)
+      let target = null
+      try {
+        target = document.querySelector(href)
+      } catch {
+        target = document.getElementById(href.replace(/^#/, ''))
+      }
       if (target) {
         target.scrollIntoView({ behavior: 'smooth' })
       }

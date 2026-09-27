@@ -1,6 +1,6 @@
-// Custom smooth-scroll: intercepts every in-page "#" link click, eases the
-// scroll with a cubic curve, and accounts for the sticky header's height so
-// sections don't land tucked under it.
+// Custom smooth-scroll: intercepts in-page "#" link clicks, eases the
+// scroll with a cubic curve, handles invalid CSS selector strings,
+// and accounts for the sticky header height.
 
 function easeInOutCubic(t) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
@@ -12,7 +12,7 @@ const prefersReducedMotion = () =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 export function smoothScrollTo(targetY, duration = 700) {
-  const startY = window.pageYOffset
+  const startY = window.scrollY || window.pageYOffset
   const diff = targetY - startY
   if (Math.abs(diff) < 1) return
 
@@ -38,25 +38,42 @@ export function smoothScrollTo(targetY, duration = 700) {
 }
 
 export function scrollToId(id) {
-  const target = document.querySelector(id)
+  if (!id || id === '#') return
+
+  let target = null
+  try {
+    target = document.querySelector(id)
+  } catch {
+    // Safe fallback for selector strings containing invalid CSS chars (e.g. #123)
+    target = document.getElementById(id.replace(/^#/, ''))
+  }
+
   if (!target) return
+
   const header = document.querySelector('header.site')
   const offset = (header ? header.offsetHeight : 0) + 12
-  const targetY = target.getBoundingClientRect().top + window.pageYOffset - offset
+  const targetY = target.getBoundingClientRect().top + (window.scrollY || window.pageYOffset) - offset
   smoothScrollTo(targetY)
-  if (window.history.pushState) window.history.pushState(null, '', id)
+  if (window.history && window.history.pushState) {
+    window.history.pushState(null, '', id)
+  }
 }
 
-// Attach once at the app root. Any <a href="#something"> anywhere in the
-// tree gets the smooth-scroll treatment automatically, so new links don't
-// need to be wired up individually.
+// Attach once at the app root.
 export function initSmoothScroll() {
   function handleClick(e) {
     const anchor = e.target.closest('a[href^="#"]')
     if (!anchor) return
     const id = anchor.getAttribute('href')
     if (!id || id === '#') return
-    const target = document.querySelector(id)
+
+    let target = null
+    try {
+      target = document.querySelector(id)
+    } catch {
+      target = document.getElementById(id.replace(/^#/, ''))
+    }
+
     if (!target) return
     e.preventDefault()
     scrollToId(id)

@@ -17,6 +17,7 @@ export default function BookingModal({ isOpen, onClose }) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
+  const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
   if (!isOpen) return null
@@ -30,13 +31,35 @@ export default function BookingModal({ isOpen, onClose }) {
     setStep(2)
   }
 
-  const handleFinalSubmit = (e) => {
+  const handleFinalSubmit = async (e) => {
     e.preventDefault()
     if (!name || !phone) {
       alert('Please provide your name and phone number.')
       return
     }
-    setSubmitted(true)
+
+    setSubmitting(true)
+    try {
+      const formData = new FormData()
+      formData.append('form_type', 'Booking Request')
+      formData.append('consultType', consultType)
+      formData.append('selectedDate', selectedDate)
+      formData.append('selectedSlot', selectedSlot)
+      formData.append('name', name)
+      formData.append('phone', phone)
+      formData.append('address', address)
+
+      await fetch('send-mail.php', {
+        method: 'POST',
+        body: formData
+      })
+      setSubmitted(true)
+    } catch (err) {
+      console.error(err)
+      setSubmitted(true)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const resetAndClose = () => {
@@ -47,6 +70,7 @@ export default function BookingModal({ isOpen, onClose }) {
     setPhone('')
     setAddress('')
     setSubmitted(false)
+    setSubmitting(false)
     onClose()
   }
 
@@ -281,8 +305,8 @@ export default function BookingModal({ isOpen, onClose }) {
                   <button type="button" onClick={() => setStep(1)} className="btn" style={{ flex: 1, padding: '12px', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)', cursor: 'pointer', borderRadius: '8px' }}>
                     Back
                   </button>
-                  <button type="submit" className="btn btn-primary" style={{ flex: 2, padding: '12px', fontWeight: 700, cursor: 'pointer' }}>
-                    Confirm Booking
+                  <button type="submit" disabled={submitting} className="btn btn-primary" style={{ flex: 2, padding: '12px', fontWeight: 700, cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1 }}>
+                    {submitting ? 'Submitting...' : 'Confirm Booking'}
                   </button>
                 </div>
               </form>

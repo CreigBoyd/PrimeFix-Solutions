@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import ServiceModal from './ServiceModal'
 
@@ -34,7 +34,7 @@ const SERVICES = [
     badge: 'Seasonal Care',
     desc: 'Regular mowing and seasonal cleanups that keep a property looking cared for.',
     items: ['Mowing & trimming', 'Spring & fall cleanup', 'Mulching & bed work', 'Brush & branch clearing'],
-    imageUrl: 'https://images.unsplash.com/photo-1686663048931-6df69f577a2f?q=80&w=876&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D?auto=format&fit=crop&q=80&w=800',
+    imageUrl: 'https://images.unsplash.com/photo-1686663048931-6df69f577a2f?auto=format&fit=crop&q=80&w=800',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
@@ -81,18 +81,45 @@ const SERVICES = [
 ]
 
 export default function Services() {
-  const [activeService, setActiveService] = useState(null);
+  const [activeService, setActiveService] = useState(null)
+  const [isClosedRecently, setIsClosedRecently] = useState(false)
+  const lastClosedAt = useRef(0)
+
+  const handleCardClick = (e, service) => {
+    if (e && e.stopPropagation) e.stopPropagation()
+
+    // Prevent re-opening if modal is open, closing, or closed under 600ms ago
+    if (activeService || isClosedRecently || Date.now() - lastClosedAt.current < 600) {
+      return
+    }
+
+    setActiveService(service)
+  }
+
+  const handleClose = () => {
+    lastClosedAt.current = Date.now()
+    setActiveService(null)
+    setIsClosedRecently(true)
+
+    // Keep pointer events disabled for 600ms after closing to swallow mobile tap delay
+    setTimeout(() => {
+      setIsClosedRecently(false)
+    }, 600)
+  }
+
+  const isLocked = Boolean(activeService) || isClosedRecently
 
   return (
     <section id="services">
       <style>{`
         .service-card-interactive { cursor: pointer; transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease; overflow: hidden; padding: 0 !important; }
+        .service-card-interactive.card-locked { pointer-events: none !important; }
         .service-card-image-wrap { width: 100%; height: 160px; overflow: hidden; position: relative; }
         .service-card-image-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
         .service-card-interactive:hover .service-card-image-wrap img { transform: scale(1.05); }
         .service-card-content { padding: 24px; display: flex; flex-direction: column; flex-grow: 1; }
         .service-card-interactive:hover { transform: translateY(-4px); border-color: var(--teal-bright); box-shadow: 0 20px 40px rgba(14, 42, 56, 0.14); }
-        .service-card-action { margin-top: 14px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; font-weight: 700; color: var(--teal-deep); background: none; border: none; padding: 0; cursor: pointer; transition: gap 0.2s ease, color 0.2s ease; }
+        .service-card-action { margin-top: 14px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; font-weight: 700; color: var(--teal-deep); background: none; border: none; padding: 0; transition: gap 0.2s ease, color 0.2s ease; }
         :root[data-theme="dark"] .service-card-action { color: var(--teal-bright); }
         .service-card-interactive:hover .service-card-action { gap: 10px; }
         
@@ -122,12 +149,18 @@ export default function Services() {
         <div className="services-grid">
           {SERVICES.map((service) => (
             <div 
-              className="service-card service-card-interactive" 
+              className={`service-card service-card-interactive ${isLocked ? 'card-locked' : ''}`} 
               key={service.title}
-              onClick={() => setActiveService(service)}
+              onClick={(e) => handleCardClick(e, service)}
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && setActiveService(service)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleCardClick(e, service)
+                }
+              }}
             >
               <div className="service-card-image-wrap">
                 <img src={service.imageUrl} alt={service.title} loading="lazy" />
@@ -142,19 +175,18 @@ export default function Services() {
                   ))}
                 </ul>
 
-                <button className="service-card-action" type="button">
+                <span className="service-card-action">
                   View service details 
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="5" y1="12" x2="19" y2="12" />
                     <polyline points="12 5 19 12 12 19" />
                   </svg>
-                </button>
+                </span>
               </div>
             </div>
           ))}
         </div>
 
-        {/* White text link style navigation to the full interactive Service Explorer */}
         <div className="services-text-link-bar">
           <Link to="/services-explorer" className="services-text-link">
             <span>Explore all handyman tasks &amp; custom estimate builder</span>
@@ -168,7 +200,7 @@ export default function Services() {
       <ServiceModal 
         service={activeService} 
         isOpen={Boolean(activeService)} 
-        onClose={() => setActiveService(null)} 
+        onClose={handleClose} 
       />
     </section>
   )

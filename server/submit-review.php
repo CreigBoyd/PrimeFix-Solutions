@@ -3,14 +3,7 @@
  * POST /server/submit-review.php
  *
  * Expects JSON: { name, service, rating, quote, company }
- * "company" is a honeypot field, same pattern as send-mail.php / subscribe.php.
- *
- * Reviews are NEVER auto-published — anyone could otherwise post a fake
- * one-star review straight to your live site with zero friction. This
- * endpoint appends the submission to pending-reviews.json and emails you
- * a notification. To actually publish one, copy its object from
- * pending-reviews.json into src/data/reviews.json (adding an "id",
- * "date", and "featured": false) and rebuild/redeploy the frontend.
+ * "company" is a honeypot field.
  */
 
 require __DIR__ . '/bootstrap.php';
@@ -45,12 +38,8 @@ if ($errors) {
     respond(false, ['error' => implode(' ', $errors)], 422);
 }
 
-// Append to the pending queue as a JSON array (created on first submission).
+// Append entry to pending queue using atomic file locking (flock)
 $pendingPath = __DIR__ . '/pending-reviews.json';
-$pending = file_exists($pendingPath)
-    ? (json_decode(file_get_contents($pendingPath), true) ?: [])
-    : [];
-
 $entry = [
     'name'         => $name,
     'service'      => $service ?: 'Other',
@@ -59,17 +48,34 @@ $entry = [
     'submitted_at' => gmdate('c'),
 ];
 
-$pending[] = $entry;
-file_put_contents($pendingPath, json_encode($pending, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+$fh = fopen($pendingPath, 'c+');
+if ($fh) {
+    if (flock($fh, LOCK_EX)) {
+        $filesize = filesize($pendingPath);
+        $pending = [];
+        if ($filesize > 0) {
+            $content = fread($fh, $filesize);
+            $pending = json_decode($content, true) ?: [];
+        }
+        $pending[] = $entry;
 
-// Notify the owner — same as the other two endpoints, failure here doesn't
-// fail the request since the submission is already safely saved above.
+        ftruncate($fh, 0);
+        rewind($fh);
+        fwrite($fh, json_encode($pending, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        fflush($fh);
+        flock($fh, LOCK_UN);
+    }
+    fclose($fh);
+}
+
+// Notify owner
 try {
     $mail = build_mailer($config);
     $mail->addAddress($config['notify_to_email']);
 
     $mail->isHTML(true);
-    $mail->Subject = "New review pending approval — {$name} ({$rating}\u2605)";
+    // Fixed PHP curly brace Unicode syntax: \u{2605}
+    $mail->Subject = "New review pending approval — {$name} ({$rating}\u{2605})";
     $mail->Body = '
         <h2>New review awaiting approval</h2>
         <p><strong>Name:</strong> ' . htmlspecialchars($name) . '</p>

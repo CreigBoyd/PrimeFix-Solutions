@@ -6,7 +6,6 @@ const PROJECTS = [
     title: 'Full Exterior Deck Rebuild & Railing Upgrade',
     category: 'Carpentry',
     desc: 'Replaced a severely weathered, rotting 20-year-old pine deck with low-maintenance composite decking and custom black aluminum railing.',
-    // Using placeholder transformation imagery (you can swap with real project image URLs)
     beforeImg: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=80',
     afterImg: 'https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?auto=format&fit=crop&w=1200&q=80',
   },
@@ -42,7 +41,7 @@ function ComparisonSlider({ beforeImg, afterImg, title }) {
   }
 
   const handleTouchMove = (e) => {
-    if (!containerRef.current || !e.touches[0]) return
+    if (!isDragging || !containerRef.current || !e.touches[0]) return
     const rect = containerRef.current.getBoundingClientRect()
     const x = e.touches[0].clientX - rect.left
     const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100))
@@ -57,6 +56,7 @@ function ComparisonSlider({ beforeImg, afterImg, title }) {
       onMouseLeave={() => setIsDragging(false)}
       onTouchMove={handleTouchMove}
       onTouchEnd={() => setIsDragging(false)}
+      onTouchCancel={() => setIsDragging(false)}
       style={{
         position: 'relative',
         width: '100%',
@@ -114,6 +114,7 @@ function ComparisonSlider({ beforeImg, afterImg, title }) {
           cursor: 'ew-resize',
           zIndex: 3,
           transform: 'translateX(-50%)',
+          touchAction: 'none',
         }}
       >
         <div

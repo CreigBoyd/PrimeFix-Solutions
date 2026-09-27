@@ -1,0 +1,5 @@
+
+<FilesMatch "\.(json|csv|env|log|example\.php)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

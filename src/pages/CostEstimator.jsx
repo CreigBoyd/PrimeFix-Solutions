@@ -46,6 +46,7 @@ const ESTIMATE_CONFIGS = {
 export default function CostEstimator() {
   const [selectedService, setSelectedService] = useState('Carpentry & Decks')
   const [quantity, setQuantity] = useState(ESTIMATE_CONFIGS['Carpentry & Decks'].defaultVal)
+  const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [contactInfo, setContactInfo] = useState({ name: '', phone: '', email: '' })
 
@@ -62,13 +63,35 @@ export default function CostEstimator() {
   const lowEnd = Math.round(calculatedBase * 0.9)
   const highEnd = Math.round(calculatedBase * 1.15)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!contactInfo.name || !contactInfo.phone) {
       alert('Please enter your name and phone number so we can verify your estimate.')
       return
     }
-    setSubmitted(true)
+
+    setSubmitting(true)
+    try {
+      const formData = new FormData()
+      formData.append('form_type', 'Instant Cost Estimator')
+      formData.append('service', selectedService)
+      formData.append('quantity', quantity.toString())
+      formData.append('estimatedRange', `$${lowEnd.toLocaleString()} – $${highEnd.toLocaleString()}`)
+      formData.append('name', contactInfo.name)
+      formData.append('phone', contactInfo.phone)
+      formData.append('email', contactInfo.email)
+
+      await fetch('send-mail.php', {
+        method: 'POST',
+        body: formData
+      })
+      setSubmitted(true)
+    } catch (err) {
+      console.error(err)
+      setSubmitted(true)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -153,9 +176,9 @@ export default function CostEstimator() {
             <form onSubmit={handleSubmit} style={{ borderTop: '1px solid var(--border)', paddingTop: '28px' }}>
               <h3 style={{ fontSize: '1.1rem', marginBottom: '16px' }}>Want to lock in this estimate or schedule an on-site walkthrough?</h3>
               
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '16px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>Your Name</label>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>Your Name *</label>
                   <input
                     type="text"
                     placeholder="John Doe"
@@ -166,7 +189,7 @@ export default function CostEstimator() {
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>Phone Number</label>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>Phone Number *</label>
                   <input
                     type="tel"
                     placeholder="(555) 000-0000"
@@ -176,14 +199,25 @@ export default function CostEstimator() {
                     required
                   />
                 </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>Email Address</label>
+                  <input
+                    type="email"
+                    placeholder="john@example.com"
+                    value={contactInfo.email}
+                    onChange={(e) => setContactInfo({ ...contactInfo, email: e.target.value })}
+                    style={{ width: '100%', padding: '12px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '8px', color: '#fff', outline: 'none' }}
+                  />
+                </div>
               </div>
 
               <button
                 type="submit"
+                disabled={submitting}
                 className="btn btn-primary"
-                style={{ width: '100%', padding: '14px', fontWeight: 700, fontSize: '1rem', cursor: 'pointer', marginTop: '8px' }}
+                style={{ width: '100%', padding: '14px', fontWeight: 700, fontSize: '1rem', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1, marginTop: '8px' }}
               >
-                Send Me This Estimate &amp; Schedule Free Quote
+                {submitting ? 'Sending Request...' : 'Send Me This Estimate & Schedule Free Quote'}
               </button>
             </form>
 

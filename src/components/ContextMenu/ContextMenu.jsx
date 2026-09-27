@@ -24,9 +24,6 @@ const Popover = styled.div`
 	}
 `
 
-// Shared positioning logic used by both ContextMenu and RootContextMenu:
-// clamps the popover inside the viewport and sets the scale-in origin to
-// wherever the pointer actually was.
 function usePopoverPlacement(open, pt, popRef) {
 	useLayoutEffect(() => {
 		if (!open) return
@@ -152,6 +149,7 @@ export function ContextMenu({ targetRef, overrideRootMenu = true, holdMs = 600, 
 		el.addEventListener('pointerup', end, opts)
 		el.addEventListener('pointercancel', end, opts)
 		el.addEventListener('pointerleave', end, opts)
+		window.addEventListener('scroll', clearTimer, { passive: true })
 
 		return () => {
 			el.removeEventListener('contextmenu', onContextMenu, opts)
@@ -160,6 +158,7 @@ export function ContextMenu({ targetRef, overrideRootMenu = true, holdMs = 600, 
 			el.removeEventListener('pointerup', end, opts)
 			el.removeEventListener('pointercancel', end, opts)
 			el.removeEventListener('pointerleave', end, opts)
+			window.removeEventListener('scroll', clearTimer)
 			clearTimer()
 		}
 	}, [targetRef, holdMs, overrideRootMenu])
@@ -197,6 +196,9 @@ export function RootContextMenu({ excludedRefs = [], holdMs = 650, menu }) {
 	const lastPointRef = useRef({ x: 0, y: 0 })
 
 	const startPtRef = useRef(null)
+	const excludedRefsRef = useRef(excludedRefs)
+	excludedRefsRef.current = excludedRefs
+
 	const MOVE_TOLERANCE = 8
 
 	const close = () => setOpen(false)
@@ -216,7 +218,7 @@ export function RootContextMenu({ excludedRefs = [], holdMs = 650, menu }) {
 	}
 
 	useEffect(() => {
-		const shouldIgnore = (e) => isWithinAnyRef(e, excludedRefs)
+		const shouldIgnore = (e) => isWithinAnyRef(e, excludedRefsRef.current)
 
 		const onContextMenu = (e) => {
 			if (shouldIgnore(e)) return
@@ -255,6 +257,7 @@ export function RootContextMenu({ excludedRefs = [], holdMs = 650, menu }) {
 		window.addEventListener('pointerup', end, { passive: false })
 		window.addEventListener('pointercancel', end, { passive: false })
 		window.addEventListener('pointerleave', end, { passive: false })
+		window.addEventListener('scroll', clearTimer, { passive: true })
 
 		return () => {
 			window.removeEventListener('contextmenu', onContextMenu)
@@ -263,9 +266,10 @@ export function RootContextMenu({ excludedRefs = [], holdMs = 650, menu }) {
 			window.removeEventListener('pointerup', end)
 			window.removeEventListener('pointercancel', end)
 			window.removeEventListener('pointerleave', end)
+			window.removeEventListener('scroll', clearTimer)
 			clearTimer()
 		}
-	}, [excludedRefs, holdMs])
+	}, [holdMs])
 
 	useCloseOnEscape(open, close)
 	usePopoverPlacement(open, pt, popRef)

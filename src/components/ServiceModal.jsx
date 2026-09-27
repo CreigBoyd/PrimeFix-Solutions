@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react'
 
 export default function ServiceModal({
   service = null,
@@ -6,73 +6,79 @@ export default function ServiceModal({
   onClose,
   onCtaClick
 }) {
-  const [isExiting, setIsExiting] = useState(false);
-  const [renderService, setRenderService] = useState(service);
+  const [isExiting, setIsExiting] = useState(false)
+  const [renderService, setRenderService] = useState(service)
 
   // Keep active service data persistent during slide-down exit animation
   useEffect(() => {
     if (service) {
-      setRenderService(service);
+      setRenderService(service)
     }
-  }, [service]);
+  }, [service])
 
   const triggerClose = () => {
-    if (isExiting) return;
-    setIsExiting(true);
+    if (isExiting) return
+    setIsExiting(true)
     setTimeout(() => {
-      setIsExiting(false);
-      if (onClose) onClose();
-    }, 480); // Matches the 480ms exit animation
-  };
+      setIsExiting(false)
+      if (onClose) onClose()
+    }, 480) // Matches the 480ms exit animation duration
+  }
 
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && isOpen && !isExiting) {
-        triggerClose();
+        triggerClose()
       }
-    };
+    }
 
     if (isOpen) {
-      setIsExiting(false);
-      document.body.style.overflow = 'hidden';
-      window.addEventListener('keydown', handleKeyDown);
+      setIsExiting(false)
+      document.body.style.overflow = 'hidden'
+      window.addEventListener('keydown', handleKeyDown)
     } else {
-      document.body.style.overflow = '';
+      document.body.style.overflow = ''
     }
 
     return () => {
-      document.body.style.overflow = '';
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen]);
+      document.body.style.overflow = ''
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isOpen, isExiting])
 
-  if (!isOpen && !isExiting) return null;
+  if (!isOpen && !isExiting) return null
 
-  const activeService = service || renderService;
+  const activeService = service || renderService
 
   const {
-    title = "Commercial & Residential Painting",
-    badge = "Popular",
-    desc = "Full interior and exterior painting services for homes and commercial buildings.",
-    imageUrl = "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&q=80&w=800",
+    title = 'Commercial & Residential Painting',
+    badge = 'Popular',
+    desc = 'Full interior and exterior painting services for homes and commercial buildings.',
+    imageUrl = 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&q=80&w=800',
     items = [],
-    ctaText = "Get Free Estimate"
-  } = activeService || {};
+    ctaText = 'Get Free Estimate'
+  } = activeService || {}
 
   const handleCta = (e) => {
-    triggerClose();
+    triggerClose()
     if (onCtaClick) {
-      onCtaClick(e);
+      onCtaClick(e)
     } else {
-      const contactSection = document.getElementById('contact');
+      const contactSection = document.getElementById('contact')
       if (contactSection) {
-        contactSection.scrollIntoView({ behavior: 'smooth' });
+        contactSection.scrollIntoView({ behavior: 'smooth' })
       }
     }
-  };
+  }
 
   return (
-    <>
+    <div
+      className={`primefix-modal-overlay ${isOpen && !isExiting ? 'open' : ''} ${isExiting ? 'exiting' : ''}`}
+      onClick={triggerClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="primefix-modal-title"
+    >
       <style>{`
         /* Keyframes for Entrance Swing Animations */
         @keyframes primefixFadeIn {
@@ -151,7 +157,7 @@ export default function ServiceModal({
         .primefix-modal-overlay {
           position: fixed;
           inset: 0;
-          background: rgba(14, 42, 56, 0.78);
+          background: rgba(10, 19, 28, 0.82);
           backdrop-filter: blur(8px);
           z-index: 9999;
           display: flex;
@@ -173,8 +179,8 @@ export default function ServiceModal({
         /* 3D Modal Shell */
         .primefix-3d-modal {
           width: 100%;
-          max-width: 720px;
-          min-height: 380px;
+          max-width: 760px;
+          min-height: 400px;
           display: flex;
           flex-direction: row;
           position: relative;
@@ -192,15 +198,23 @@ export default function ServiceModal({
 
         /* Modal Left - Image & Badge */
         .primefix-modal-left {
-          width: 45%;
+          width: 42%;
           min-height: 320px;
           position: relative;
           background-size: cover;
           background-position: center;
-          border-radius: 12px 0 0 12px;
+          border-radius: 16px 0 0 16px;
           transform-origin: left center;
           box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
           flex: none;
+          overflow: hidden;
+        }
+
+        .primefix-modal-left::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(10,19,28,0.6) 100%);
         }
 
         .primefix-modal-overlay.open .primefix-modal-left {
@@ -211,17 +225,18 @@ export default function ServiceModal({
           animation: primefixLeftSlideOut 0.48s ease forwards;
         }
 
-        /* Price/Status Badge */
+        /* Badge */
         .primefix-modal-badge {
           position: absolute;
           top: 16px;
           left: 16px;
           padding: 6px 14px;
-          background: linear-gradient(135deg, var(--teal-bright, #17998D), var(--green, #2F7A4F));
-          color: #ffffff;
-          font-weight: 700;
-          font-size: 0.8rem;
-          letter-spacing: 0.03em;
+          background: linear-gradient(135deg, var(--teal-bright, #2dd4bf), var(--teal, #128077));
+          color: #0e1e2b;
+          font-weight: 800;
+          font-size: 0.78rem;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
           border-radius: 20px;
           box-shadow: 0 4px 12px rgba(18, 128, 119, 0.35);
           z-index: 10;
@@ -233,17 +248,17 @@ export default function ServiceModal({
 
         /* Modal Right - Book Unfold */
         .primefix-modal-right {
-          width: 55%;
-          background: var(--bg-card, #ffffff);
-          border-radius: 0 12px 12px 0;
+          width: 58%;
+          background: var(--bg-card, #132231);
+          border-radius: 0 16px 16px 0;
           padding: 32px 28px;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
           position: relative;
           transform-origin: left center;
-          box-shadow: 5px 15px 30px rgba(0, 0, 0, 0.15);
-          border: 1px solid var(--border, rgba(14,42,56,0.1));
+          box-shadow: 5px 15px 30px rgba(0, 0, 0, 0.25);
+          border: 1px solid var(--border, #20364d);
           border-left: none;
         }
 
@@ -251,20 +266,44 @@ export default function ServiceModal({
           animation: primefixRightUnfoldIn 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.25) 0.08s forwards;
         }
 
+        .primefix-modal-close {
+          position: absolute;
+          top: 16px;
+          right: 16px;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid var(--border, #20364d);
+          color: var(--text-soft, #94a3b8);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          font-size: 1rem;
+          line-height: 1;
+        }
+
+        .primefix-modal-close:hover {
+          background: rgba(255, 255, 255, 0.18);
+          color: #ffffff;
+        }
+
         .primefix-modal-right h3 {
           margin: 0 0 10px 0;
-          color: var(--text, #0E2A38);
-          font-family: 'Newsreader', serif;
-          font-size: 1.5rem;
-          font-weight: 600;
-          line-height: 1.2;
+          color: #ffffff;
+          font-size: 1.45rem;
+          font-weight: 700;
+          line-height: 1.25;
+          padding-right: 28px;
         }
 
         .primefix-modal-right p.desc {
-          margin: 0 0 16px 0;
-          color: var(--text-soft, #4A6572);
-          font-size: 0.92rem;
-          line-height: 1.55;
+          margin: 0 0 18px 0;
+          color: var(--text-soft, #94a3b8);
+          font-size: 0.9rem;
+          line-height: 1.5;
         }
 
         .primefix-modal-list {
@@ -273,166 +312,107 @@ export default function ServiceModal({
           margin: 0 0 24px 0;
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 10px;
+          max-height: 180px;
+          overflow-y: auto;
         }
 
-        .primefix-modal-list li {
-          font-size: 0.86rem;
-          color: var(--text, #0E2A38);
+        .primefix-modal-item {
           display: flex;
           align-items: center;
           gap: 10px;
+          font-size: 0.88rem;
+          color: #ffffff;
         }
 
-        .primefix-modal-list li svg {
-          width: 16px;
-          height: 16px;
-          color: var(--teal-bright, #17998D);
+        .primefix-modal-icon {
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: rgba(45, 212, 191, 0.15);
+          color: var(--teal-bright, #2dd4bf);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.75rem;
+          font-weight: bold;
           flex-shrink: 0;
         }
 
-        /* Action & Close Buttons */
         .primefix-modal-actions {
           display: flex;
-          align-items: center;
           gap: 12px;
+          align-items: center;
           margin-top: auto;
-        }
-
-        .primefix-modal-cta {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          padding: 12px 22px;
-          background: linear-gradient(120deg, var(--teal-bright, #17998D), var(--green, #2F7A4F));
-          color: #ffffff;
-          border: none;
-          border-radius: 6px;
-          font-weight: 700;
-          font-size: 0.9rem;
-          cursor: pointer;
-          transition: filter 0.2s, transform 0.12s;
-          text-decoration: none;
-          box-shadow: 0 4px 12px rgba(23, 153, 141, 0.25);
-        }
-        .primefix-modal-cta:hover {
-          filter: brightness(1.08);
-          transform: translateY(-1px);
-        }
-
-        .primefix-modal-close {
-          position: absolute;
-          top: 14px;
-          right: 14px;
-          background: var(--bg, rgba(0,0,0,0.05));
-          border: none;
-          color: var(--text-soft, #4A6572);
-          cursor: pointer;
-          width: 32px;
-          height: 32px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 50%;
-          transition: all 0.2s ease;
-          z-index: 20;
-        }
-        .primefix-modal-close:hover {
-          color: var(--text, #0E2A38);
-          background: rgba(0,0,0,0.1);
-          transform: scale(1.08);
-        }
-        .primefix-modal-close svg {
-          width: 18px;
-          height: 18px;
         }
 
         @media (max-width: 680px) {
           .primefix-3d-modal {
             flex-direction: column;
-            max-width: 440px;
             max-height: 85vh;
             overflow-y: auto;
           }
           .primefix-modal-left {
             width: 100%;
-            min-height: 200px;
-            height: 200px;
-            border-radius: 12px 12px 0 0;
+            min-height: 180px;
+            border-radius: 16px 16px 0 0;
           }
           .primefix-modal-right {
             width: 100%;
-            border-radius: 0 0 12px 12px;
-            border-left: 1px solid var(--border, rgba(14,42,56,0.1));
+            border-radius: 0 0 16px 16px;
+            border-left: 1px solid var(--border, #20364d);
             border-top: none;
           }
         }
       `}</style>
 
-      {/* Modal Backdrop & 3D Container */}
-      <div 
-        className={`primefix-modal-overlay ${isOpen && !isExiting ? 'open' : ''} ${isExiting ? 'exiting' : ''}`}
-        onClick={triggerClose}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modal-title"
-      >
-        <div 
-          className="primefix-3d-modal" 
-          onClick={(e) => e.stopPropagation()}
+      {}
+      <div className="primefix-3d-modal" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="primefix-modal-left"
+          style={{ backgroundImage: `url(${imageUrl})` }}
         >
-          {/* Left Panel - Image & Badge */}
-          <div 
-            className="primefix-modal-left" 
-            style={{ backgroundImage: `url(${imageUrl})` }}
+          {badge && <div className="primefix-modal-badge">{badge}</div>}
+        </div>
+
+        <div className="primefix-modal-right">
+          <button
+            className="primefix-modal-close"
+            onClick={triggerClose}
+            aria-label="Close modal"
+            type="button"
           >
-            {badge && <span className="primefix-modal-badge">{badge}</span>}
+            ✕
+          </button>
+
+          <div>
+            <h3 id="primefix-modal-title">{title}</h3>
+            <p className="desc">{desc}</p>
+
+            {items && items.length > 0 && (
+              <ul className="primefix-modal-list">
+                {items.map((item, idx) => (
+                  <li key={idx} className="primefix-modal-item">
+                    <span className="primefix-modal-icon">✓</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
-          {/* Right Panel - Text Content */}
-          <div className="primefix-modal-right">
-            <button 
-              className="primefix-modal-close" 
-              onClick={triggerClose} 
-              aria-label="Close modal"
+          <div className="primefix-modal-actions">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleCta}
+              style={{ width: '100%', padding: '12px 20px', fontWeight: 700 }}
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
+              {ctaText}
             </button>
-
-            <div>
-              <h3 id="modal-title">{title}</h3>
-              <p className="desc">{desc}</p>
-
-              {items && items.length > 0 && (
-                <ul className="primefix-modal-list">
-                  {items.map((item, idx) => (
-                    <li key={idx}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            <div className="primefix-modal-actions">
-              <a href="#contact" className="primefix-modal-cta" onClick={handleCta}>
-                {ctaText}
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                  <polyline points="12 5 19 12 12 19" />
-                </svg>
-              </a>
-            </div>
           </div>
         </div>
       </div>
-    </>
-  );
+    </div>
+  )
 }

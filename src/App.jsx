@@ -13,9 +13,6 @@ import BeforeAfterPortfolio from './pages/BeforeAfterPortfolio'
 import CostEstimator from './pages/CostEstimator'
 import { initSmoothScroll } from './utils/smoothScroll'
 
-// Right-click (or long-press on touch) anywhere on the page to bring this
-// up. Swap any of these actions out for whatever's actually useful —
-// nothing here is tied to a specific element, so it's just this one list.
 const siteMenuItems = [
   {
     menuItemType: 'button',
@@ -40,7 +37,11 @@ const siteMenuItems = [
     menuItemType: 'button',
     labelText: 'Copy page link',
     icon: { faIcon: faLink },
-    onClick: () => navigator.clipboard?.writeText(window.location.href),
+    onClick: () => {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(window.location.href).catch(() => {})
+      }
+    },
   },
   {
     menuItemType: 'button',

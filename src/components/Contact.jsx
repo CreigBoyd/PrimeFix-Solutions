@@ -30,9 +30,6 @@ const TIME_SLOTS = [
   '4:00 PM – 5:00 PM',
 ]
 
-// One validator per field that needs it. Return '' for valid, or the
-// message to show. Fields not listed here (service, message) aren't
-// required, so they're never validated.
 const FIELD_VALIDATORS = {
   name: (value) => (value.trim() ? '' : 'Please enter your name.'),
   phone: (value) => {
@@ -83,7 +80,9 @@ export default function Contact() {
   const [bookingName, setBookingName] = useState('')
   const [bookingPhone, setBookingPhone] = useState('')
   const [bookingAddress, setBookingAddress] = useState('')
+  const [bookingSubmitting, setBookingSubmitting] = useState(false)
   const [bookingSubmitted, setBookingSubmitted] = useState(false)
+  const [bookingError, setBookingError] = useState('')
 
   const handleZipCheck = (e) => {
     e.preventDefault()
@@ -133,6 +132,13 @@ export default function Contact() {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
+    // Honeypot check
+    if (form.company) {
+      setStatus('success')
+      setForm(INITIAL_FORM)
+      return
+    }
+
     const errors = validateAll()
     if (Object.keys(errors).length) {
       setFieldErrors(errors)
@@ -150,7 +156,13 @@ export default function Contact() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       })
-      const data = await res.json().catch(() => ({}))
+
+      const contentType = res.headers.get('content-type') || ''
+      if (!contentType.includes('application/json')) {
+        throw new Error('Server configuration error: Response was not valid JSON.')
+      }
+
+      const data = await res.json()
 
       if (!res.ok || !data.ok) {
         throw new Error(data.error || 'Something went wrong sending that. Please call or text us instead.')
@@ -182,13 +194,52 @@ export default function Contact() {
     setBookingStep(2)
   }
 
-  const handleBookingSubmit = (e) => {
+  const handleBookingSubmit = async (e) => {
     e.preventDefault()
     if (!bookingName || !bookingPhone) {
       alert('Please provide your name and phone number.')
       return
     }
-    setBookingSubmitted(true)
+
+    setBookingSubmitting(true)
+    setBookingError('')
+
+    try {
+      const messageContent = [
+        `Requested Consultation Slot: ${consultType}`,
+        `Date: ${selectedDate}`,
+        `Time Window: ${selectedSlot}`,
+        bookingAddress ? `Property Address: ${bookingAddress}` : null
+      ].filter(Boolean).join('\n')
+
+      const res = await fetch(`${API_BASE}/send-mail.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: bookingName,
+          phone: bookingPhone,
+          service: `Consultation Slot (${consultType})`,
+          message: messageContent
+        })
+      })
+
+      const contentType = res.headers.get('content-type') || ''
+      if (!contentType.includes('application/json')) {
+        throw new Error('Server configuration error: Backend returned non-JSON response.')
+      }
+
+      const data = await res.json()
+
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || 'Failed to schedule appointment. Please contact us directly.')
+      }
+
+      setBookingSubmitted(true)
+    } catch (err) {
+      setBookingError(err.message)
+    } finally {
+      setBookingSubmitting(false)
+    }
   }
 
   const resetBookingModal = () => {
@@ -200,6 +251,7 @@ export default function Contact() {
     setBookingPhone('')
     setBookingAddress('')
     setBookingSubmitted(false)
+    setBookingError('')
   }
 
   // Tomorrow date for min selector
@@ -592,12 +644,21 @@ export default function Contact() {
                       🗓️ <strong>{consultType}</strong> on <span style={{ color: '#fff' }}>{selectedDate}</span> ({selectedSlot})
                     </div>
 
+                    {bookingError && (
+                      <p style={{ color: '#f87171', fontSize: '0.85rem', marginBottom: '16px' }}>{bookingError}</p>
+                    )}
+
                     <div style={{ display: 'flex', gap: '10px' }}>
                       <button type="button" onClick={() => setBookingStep(1)} className="btn" style={{ flex: 1, padding: '12px', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)', cursor: 'pointer', borderRadius: '8px' }}>
                         Back
                       </button>
-                      <button type="submit" className="btn btn-primary" style={{ flex: 2, padding: '12px', fontWeight: 700, cursor: 'pointer' }}>
-                        Confirm Booking
+                      <button
+                        type="submit"
+                        className="btn btn-primary"
+                        disabled={bookingSubmitting}
+                        style={{ flex: 2, padding: '12px', fontWeight: 700, cursor: bookingSubmitting ? 'not-allowed' : 'pointer', opacity: bookingSubmitting ? 0.7 : 1 }}
+                      >
+                        {bookingSubmitting ? 'Booking...' : 'Confirm Booking'}
                       </button>
                     </div>
                   </form>
@@ -607,7 +668,7 @@ export default function Contact() {
               <div style={{ textAlign: 'center', padding: '24px 0' }}>
                 <h4 style={{ fontSize: '1.5rem', color: 'var(--teal-bright, #2dd4bf)', marginBottom: '12px' }}>You're Booked! 🎉</h4>
                 <p style={{ fontSize: '0.95rem', color: 'var(--text-soft)', lineHeight: 1.5, marginBottom: '24px' }}>
-                  We've reserved your slot for <strong>{selectedDate}</strong> between <strong>{selectedSlot}</strong>. We'll send a confirmation call to <strong>{bookingPhone}</strong> shortly.
+                  We've reserved your slot for <strong>{selectedDate}</strong> between <strong>{selectedSlot}</strong>. We'll send a confirmation call or message to <strong>{bookingPhone}</strong> shortly.
                 </p>
                 <button type="button" onClick={resetBookingModal} className="btn btn-primary" style={{ width: '100%', padding: '12px', cursor: 'pointer' }}>
                   Done

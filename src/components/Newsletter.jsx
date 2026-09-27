@@ -48,10 +48,15 @@ export default function Newsletter() {
     setError('')
 
     try {
-      const res = await fetch(`${API_BASE}/subscribe.php`, {
+      const res = await fetch(`${API_BASE}/send-mail.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, company }),
+        body: JSON.stringify({ 
+          email, 
+          company,
+          service: 'Newsletter Subscription',
+          message: 'User subscribed via website newsletter form.'
+        }),
       })
       const data = await res.json().catch(() => ({}))
 
