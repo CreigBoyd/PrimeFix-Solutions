@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import { faPhone, faEnvelope, faClipboardCheck, faLink, faArrowUp } from '@fortawesome/free-solid-svg-icons'
 import EmergencyBanner from './components/EmergencyBanner'
 import Header from './components/Header'
@@ -14,6 +14,7 @@ import CostEstimator from './pages/CostEstimator'
 import FAQ from './pages/FAQ'
 import { initSmoothScroll } from './utils/smoothScroll'
 import NotFound from './pages/NotFound'
+import Chatbot from './components/Chatbot'
 
 const siteMenuItems = [
   {
@@ -54,6 +55,13 @@ const siteMenuItems = [
 ]
 
 export default function App() {
+  const { pathname } = useLocation()
+
+  // Reset scroll position to top on page change
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+
   useEffect(() => {
     const cleanup = initSmoothScroll()
     return cleanup
@@ -73,11 +81,11 @@ export default function App() {
           <Route path="/cost-estimator" element={<CostEstimator />} />
           <Route path="/faq" element={<FAQ />} />
           {/* Catch-all 404 Route */}
-        <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       <Footer />
-
+<Chatbot />
       <RootContextMenu
         holdMs={650}
         menu={() => <MenuCard items={siteMenuItems} size={1.0} maxWidthRem={22} enableTextSelection={false} />}
