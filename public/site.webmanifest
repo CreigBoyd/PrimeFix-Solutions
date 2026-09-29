@@ -1,6 +1,10 @@
 {
   "name": "Prime Fix Solutions",
   "short_name": "Prime Fix",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a131c",
+  "theme_color": "#0a131c",
   "icons": [
     {
       "src": "/favicon-16x16.png",
@@ -16,9 +20,17 @@
       "src": "/apple-touch-icon.png",
       "sizes": "180x180",
       "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ],
-  "theme_color": "#0a131c",
-  "background_color": "#0a131c",
-  "display": "standalone"
+  ]
 }

@@ -1,8 +1,13 @@
+import React from 'react';
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { showToast } from '../utils/toast'
+import usePageTitle from '../hooks/usePageTitle';
 
 export default function NotFound() {
+  // Sets the browser tab title to "Customer Reviews | PrimeFix Solutions"
+  usePageTitle('Not Found');
+
   const navigate = useNavigate()
   const [fixedCount, setFixedCount] = useState(0)
 

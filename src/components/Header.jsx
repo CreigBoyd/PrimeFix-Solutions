@@ -1,7 +1,9 @@
+// src/components/Header.jsx
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import logo from '../assets/primefix-solutions-logo-dark-bg.svg'
 import JellyButton from './JellyButton'
+import { pageImports } from '../routes/pageRegistry'
 
 const NAV_LINKS = [
   { href: '#services', label: 'Services' },
@@ -106,7 +108,14 @@ export default function Header() {
   return (
     <header className="site">
       <div className="wrap header-row">
-        <Link to="/" className="brand" aria-label="PrimeFix Solutions home" onClick={handleBrandClick}>
+        <Link 
+          to="/" 
+          className="brand" 
+          aria-label="PrimeFix Solutions home" 
+          onClick={handleBrandClick}
+          onMouseEnter={pageImports.home}
+          onTouchStart={pageImports.home}
+        >
           <img
             src={logo}
             alt=""
@@ -132,10 +141,20 @@ export default function Header() {
             </a>
           ))}
           
-          <Link to="/reviews" className="nav-link">
+          <Link 
+            to="/reviews" 
+            className="nav-link"
+            onMouseEnter={pageImports.reviews}
+            onTouchStart={pageImports.reviews}
+          >
             Reviews
           </Link>
-          <Link to="/faq" className="nav-link">
+          <Link 
+            to="/faq" 
+            className="nav-link"
+            onMouseEnter={pageImports.faq}
+            onTouchStart={pageImports.faq}
+          >
             FAQ
           </Link>
         </nav>
@@ -177,8 +196,22 @@ export default function Header() {
           </a>
         ))}
         
-        <Link to="/reviews" onClick={closeMenu}>Reviews</Link>
-        <Link to="/faq" onClick={closeMenu}>FAQ</Link>
+        <Link 
+          to="/reviews" 
+          onClick={closeMenu}
+          onMouseEnter={pageImports.reviews}
+          onTouchStart={pageImports.reviews}
+        >
+          Reviews
+        </Link>
+        <Link 
+          to="/faq" 
+          onClick={closeMenu}
+          onMouseEnter={pageImports.faq}
+          onTouchStart={pageImports.faq}
+        >
+          FAQ
+        </Link>
         <a href="tel:5550102000" onClick={closeMenu}><strong>(555) 010-2000</strong></a>
       </div>
     </header>

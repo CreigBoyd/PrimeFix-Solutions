@@ -163,7 +163,14 @@ export default function Services() {
               }}
             >
               <div className="service-card-image-wrap">
-                <img src={service.imageUrl} alt={service.title} loading="lazy" />
+                <img 
+  src={service.imageUrl} 
+  alt={`PrimeFix Solutions ${service.title} service`} 
+  loading="lazy" 
+  decoding="async"
+  width="800"
+  height="533"
+/>
               </div>
               <div className="service-card-content">
                 <div className="icon-badge">{service.icon}</div>

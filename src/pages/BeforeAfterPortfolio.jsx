@@ -1,4 +1,10 @@
 import { useState, useRef } from 'react'
+import cabinetOld from '../assets/slider-images/Cabinet-Old.webp'
+import cabinetNew from '../assets/slider-images/Cabinet-New.webp'
+import deckOld from '../assets/slider-images/Deck-Old.webp'
+import deckNew from '../assets/slider-images/Deck-New.webp'
+import roofOld from '../assets/slider-images/Roof-Old.jpg'
+import roofNew from '../assets/slider-images/Roof-New.webp'
 
 const PROJECTS = [
   {
@@ -6,24 +12,24 @@ const PROJECTS = [
     title: 'Full Exterior Deck Rebuild & Railing Upgrade',
     category: 'Carpentry',
     desc: 'Replaced a severely weathered, rotting 20-year-old pine deck with low-maintenance composite decking and custom black aluminum railing.',
-    beforeImg: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=80',
-    afterImg: 'https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?auto=format&fit=crop&w=1200&q=80',
+    beforeImg: deckOld,
+    afterImg: deckNew,
   },
   {
     id: 2,
     title: 'Architectural Shingle Roof Replacement',
     category: 'Roofing',
-    desc: 'Strips away old 3-tab shingles, repaired plywood roof decking, and installed heavy-duty architectural dimensional shingles with upgraded ridge vents.',
-    beforeImg: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=80',
-    afterImg: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
+    desc: 'Stripped away old shingles, repaired plywood roof decking, and installed heavy-duty architectural dimensional shingles with upgraded ridge vents.',
+    beforeImg: roofOld,
+    afterImg: roofNew,
   },
   {
     id: 3,
     title: 'Complete Kitchen & Interior Cabinet Refinishing',
     category: 'Painting & Finishing',
     desc: 'Sprayed dated oak cabinets with a clean modern satin finish, added new matte black hardware, and updated wall trim.',
-    beforeImg: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=80',
-    afterImg: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=1200&q=80',
+    beforeImg: cabinetOld,
+    afterImg: cabinetNew,
   },
 ]
 

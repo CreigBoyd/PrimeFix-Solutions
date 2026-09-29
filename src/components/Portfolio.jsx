@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
-import deckImg from '../assets/portfolio-deck.jpg'
-import roofImg from '../assets/portfolio-roof.jpg'
-import yardImg from '../assets/portfolio-yard.jpg'
-import paintingImg from '../assets/portfolio-painting.jpg'
+import deckImg from '../assets/portfolio-deck.webp'
+import roofImg from '../assets/portfolio-roof.webp'
+import yardImg from '../assets/portfolio-yard.webp'
+import paintingImg from '../assets/portfolio-painting.webp'
 
 const PROJECTS = [
   {
@@ -44,7 +44,14 @@ export default function Portfolio() {
           {PROJECTS.map((project) => (
             <article className="portfolio-card" key={project.title}>
               <div className="thumb">
-                <img src={project.img} alt={project.alt} loading="lazy" decoding="async" />
+               <img 
+  src={project.img} 
+  alt={project.alt} 
+  loading="lazy" 
+  decoding="async" 
+  width="600"
+  height="400"
+/>
               </div>
               <div className="cap">
                 <span className="tag">{project.tag}</span>

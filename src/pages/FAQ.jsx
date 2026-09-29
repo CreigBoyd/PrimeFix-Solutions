@@ -1,5 +1,7 @@
+import React from 'react';
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import usePageTitle from '../hooks/usePageTitle';
 
 const CATEGORIES = [
   {
@@ -194,6 +196,10 @@ const FAQS = [
 ]
 
 export default function FAQ() {
+
+// Sets the browser tab title to "Customer Reviews | PrimeFix Solutions"
+  usePageTitle('FAQS');
+
   const navigate = useNavigate()
   const [activeCategory, setActiveCategory] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')

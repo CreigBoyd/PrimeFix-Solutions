@@ -1,26 +1,31 @@
-import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
-import StarRating from '../components/StarRating'
-import ReviewModal from '../components/ReviewModal'
-import reviews from '../data/reviews.json'
+import React from 'react';
+import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import StarRating from '../components/StarRating';
+import ReviewModal from '../components/ReviewModal';
+import reviews from '../data/reviews.json';
+import usePageTitle from '../hooks/usePageTitle';
 
 function formatDate(iso) {
-  return new Date(iso).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+  return new Date(iso).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
 }
 
 export default function Reviews() {
-  const [modalOpen, setModalOpen] = useState(false)
+  // Sets the browser tab title to "Customer Reviews | PrimeFix Solutions"
+  usePageTitle('Customer Reviews');
+
+  const [modalOpen, setModalOpen] = useState(false);
 
   const { average, count } = useMemo(() => {
-    const count = reviews.length
-    const average = count ? reviews.reduce((sum, r) => sum + r.rating, 0) / count : 0
-    return { average, count }
-  }, [])
+    const count = reviews.length;
+    const average = count ? reviews.reduce((sum, r) => sum + r.rating, 0) / count : 0;
+    return { average, count };
+  }, []);
 
   const sorted = useMemo(
     () => [...reviews].sort((a, b) => new Date(b.date) - new Date(a.date)),
     []
-  )
+  );
 
   return (
     <>

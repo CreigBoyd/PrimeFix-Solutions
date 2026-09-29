@@ -1,4 +1,4 @@
-import heroImg from '../assets/primefix-hero.png'
+import heroImg from '../assets/primefix-hero.webp'
 
 export default function Hero() {
   return (
@@ -25,10 +25,13 @@ export default function Hero() {
           </div>
         </div>
 
-        <div className="hero-art">
+        <div className="hero-image-wrap">
           <img
             src={heroImg}
-            alt="PrimeFix Solutions building and property maintenance professional"
+            alt="PrimeFix Solutions building maintenance technician"
+            width="800"
+            height="450"
+            loading="eager"
             fetchpriority="high"
             decoding="async"
           />
