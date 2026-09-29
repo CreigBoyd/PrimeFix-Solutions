@@ -5,11 +5,28 @@ import logo from '../assets/primefix-solutions-logo-dark-bg.svg'
 import JellyButton from './JellyButton'
 import { pageImports } from '../routes/pageRegistry'
 
-const NAV_LINKS = [
-  { href: '#services', label: 'Services' },
-  { href: '#portfolio', label: 'Portfolio' },
-  { href: '#process', label: 'Process' },
-  { href: '#contact', label: 'Contact' },
+const NAV_GROUPS = [
+  {
+    label: 'Services & Process',
+    items: [
+      { label: 'Our Services', href: '#services', isAnchor: true },
+      { label: 'How We Work', href: '#process', isAnchor: true },
+    ],
+  },
+  {
+    label: 'Portfolio & Reviews',
+    items: [
+      { label: 'Work Portfolio', href: '#portfolio', isAnchor: true },
+      { label: 'Client Reviews', href: '/reviews', isAnchor: false, importKey: 'reviews' },
+    ],
+  },
+  {
+    label: 'Help & Contact',
+    items: [
+      { label: 'FAQ', href: '/faq', isAnchor: false, importKey: 'faq' },
+      { label: 'Contact Us', href: '#contact', isAnchor: true },
+    ],
+  },
 ]
 
 export default function Header() {
@@ -24,8 +41,10 @@ export default function Header() {
   useEffect(() => {
     if (!isHome) return
 
-    const sections = NAV_LINKS
-      .map((link) => document.querySelector(link.href))
+    // Collect active anchor links dynamically for the intersection observer
+    const anchorHrefs = ['#services', '#portfolio', '#process', '#contact']
+    const sections = anchorHrefs
+      .map((href) => document.querySelector(href))
       .filter(Boolean)
 
     if (!sections.length) return
@@ -129,34 +148,43 @@ export default function Header() {
           </span>
         </Link>
 
+        {/* Desktop Dropdown Navigation */}
         <nav className="primary" aria-label="Primary">
-          {NAV_LINKS.map((link) => (
-            <a
-              key={link.href}
-              className={`nav-link${activeId === link.href ? ' active' : ''}`}
-              href={link.href}
-              onClick={(e) => handleNavClick(e, link.href)}
-            >
-              {link.label}
-            </a>
+          {NAV_GROUPS.map((group) => (
+            <div key={group.label} className="nav-dropdown">
+              <button type="button" className="dropdown-trigger">
+                {group.label}
+                <svg className="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
+
+              <div className="dropdown-menu">
+                {group.items.map((item) =>
+                  item.isAnchor ? (
+                    <a
+                      key={item.href}
+                      className={`dropdown-item${activeId === item.href ? ' active' : ''}`}
+                      href={item.href}
+                      onClick={(e) => handleNavClick(e, item.href)}
+                    >
+                      {item.label}
+                    </a>
+                  ) : (
+                    <Link
+                      key={item.href}
+                      to={item.href}
+                      className="dropdown-item"
+                      onMouseEnter={item.importKey ? pageImports[item.importKey] : undefined}
+                      onTouchStart={item.importKey ? pageImports[item.importKey] : undefined}
+                    >
+                      {item.label}
+                    </Link>
+                  )
+                )}
+              </div>
+            </div>
           ))}
-          
-          <Link 
-            to="/reviews" 
-            className="nav-link"
-            onMouseEnter={pageImports.reviews}
-            onTouchStart={pageImports.reviews}
-          >
-            Reviews
-          </Link>
-          <Link 
-            to="/faq" 
-            className="nav-link"
-            onMouseEnter={pageImports.faq}
-            onTouchStart={pageImports.faq}
-          >
-            FAQ
-          </Link>
         </nav>
 
         <div className="header-actions">
@@ -184,34 +212,35 @@ export default function Header() {
         </div>
       </div>
 
+      {/* Mobile Navigation Drawer */}
       <div id="mobile-nav" className={menuOpen ? 'open' : ''}>
-        {NAV_LINKS.map((link) => (
-          <a
-            key={link.href}
-            href={link.href}
-            className={activeId === link.href ? 'active' : ''}
-            onClick={(e) => handleNavClick(e, link.href)}
-          >
-            {link.label}
-          </a>
+        {NAV_GROUPS.map((group) => (
+          <div key={group.label} className="mobile-group">
+            <span className="mobile-group-title">{group.label}</span>
+            {group.items.map((item) =>
+              item.isAnchor ? (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className={activeId === item.href ? 'active' : ''}
+                  onClick={(e) => handleNavClick(e, item.href)}
+                >
+                  {item.label}
+                </a>
+              ) : (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  onClick={closeMenu}
+                  onMouseEnter={item.importKey ? pageImports[item.importKey] : undefined}
+                  onTouchStart={item.importKey ? pageImports[item.importKey] : undefined}
+                >
+                  {item.label}
+                </Link>
+              )
+            )}
+          </div>
         ))}
-        
-        <Link 
-          to="/reviews" 
-          onClick={closeMenu}
-          onMouseEnter={pageImports.reviews}
-          onTouchStart={pageImports.reviews}
-        >
-          Reviews
-        </Link>
-        <Link 
-          to="/faq" 
-          onClick={closeMenu}
-          onMouseEnter={pageImports.faq}
-          onTouchStart={pageImports.faq}
-        >
-          FAQ
-        </Link>
         <a href="tel:5550102000" onClick={closeMenu}><strong>(555) 010-2000</strong></a>
       </div>
     </header>
