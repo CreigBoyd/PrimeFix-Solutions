@@ -4,6 +4,37 @@ import styled, { css, keyframes } from 'styled-components'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { GlobalNoSelect, useTextSelectionPolicy } from './helpers'
 
+/* -------------------------------- HEADER & LOGO -------------------------- */
+
+const MenuHeader = styled.div`
+	display: flex;
+	align-items: center;
+	gap: calc(var(--mc-size) * 0.5);
+	padding: calc(var(--mc-size) * 0.45) calc(var(--mc-size) * 0.6);
+	border-bottom: 1px solid var(--mc-border);
+	margin-bottom: calc(var(--mc-size) * 0.25);
+	overflow: hidden;
+`
+
+const LogoImg = styled.img`
+	height: 32px;
+	max-height: 32px;
+	width: auto;
+	max-width: 140px;
+	object-fit: contain;
+	flex-shrink: 0;
+	display: block;
+`
+
+const BrandTitle = styled.span`
+	font-weight: 600;
+	font-size: calc(var(--mc-size) * 0.95);
+	color: var(--mc-fg-strong);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+`
+
 /* -------------------------------- MENU UI ------------------------------- */
 
 const BaseItem = styled.li`
@@ -522,14 +553,28 @@ function MenuItemRenderer(item) {
 	}
 }
 
-export function MenuCard({ items, size = 1.0, holdMsDefault = 2500, maxWidthRem = 20, enableTextSelection = true }) {
+export function MenuCard({
+	items,
+	size = 1.0,
+	holdMsDefault = 2500,
+	maxWidthRem = 20,
+	enableTextSelection = true,
+	logo,
+	title = 'PrimeFix Solutions',
+}) {
 	const cardSize = useMemo(() => `${size}rem`, [size])
 	const lockGlobal = useTextSelectionPolicy(enableTextSelection)
 
 	return (
 		<>
 			<GlobalNoSelect $lock={lockGlobal} />
-			<CardWrap $size={cardSize} $holdMs={holdMsDefault} style={{ width: `min(92vw, ${maxWidthRem}rem)` }}>
+			<CardWrap $size={cardSize}$holdMs={holdMsDefault} style={{ width: `min(92vw, ${maxWidthRem}rem)` }}>
+				{(logo || title) && (
+					<MenuHeader>
+						{logo && <LogoImg src={logo} alt="PrimeFix Logo" />}
+						{title && <BrandTitle>{title}</BrandTitle>}
+					</MenuHeader>
+				)}
 				<List>
 					{items.map((item, idx) => (
 						<React.Fragment key={`${item.menuItemType}-${idx}`}>{MenuItemRenderer(item)}</React.Fragment>

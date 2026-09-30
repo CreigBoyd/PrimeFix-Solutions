@@ -38,19 +38,34 @@ export default function Footer() {
       <div className="wrap">
         <div className="footer-top">
           <div className="footer-brand">
-            <Link to="/" onClick={handleBrandClick} style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', textDecoration: 'none', color: 'inherit' }}>
+            <Link to="/" onClick={handleBrandClick} className="footer-brand-link">
               <img
                 src={logo}
-                alt=""
+                alt="PrimeFix Solutions Logo"
                 className="primefix-footer-logo"
                 width="42"
                 height="42"
               />
-              <div>
-                <strong>PrimeFix Solutions</strong>
-                <p>Carpentry, roofing, repairs, painting, and grounds work — every trade, one team.</p>
-              </div>
+              <strong>PrimeFix Solutions</strong>
             </Link>
+            <p>Carpentry, roofing, repairs, painting, and grounds work — every trade, one team.</p>
+            <div className="footer-social">
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+                <i className="fa fa-twitter" aria-hidden="true"></i>
+              </a>
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                <i className="fa fa-facebook" aria-hidden="true"></i>
+              </a>
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                <i className="fa fa-github" aria-hidden="true"></i>
+              </a>
+              <a href="https://stackoverflow.com" target="_blank" rel="noopener noreferrer" aria-label="Stack Overflow">
+                <i className="fa fa-stack-overflow" aria-hidden="true"></i>
+              </a>
+              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                <i className="fa fa-linkedin" aria-hidden="true"></i>
+              </a>
+            </div>
           </div>
           <div className="footer-links">
             <div>

@@ -1,3 +1,4 @@
+// src/components/ServiceModal.jsx
 import React, { useEffect, useState } from 'react'
 
 export default function ServiceModal({
@@ -9,12 +10,26 @@ export default function ServiceModal({
   const [isExiting, setIsExiting] = useState(false)
   const [renderService, setRenderService] = useState(service)
 
-  // Keep active service data persistent during slide-down exit animation
+  // Keep active service data persistent during exit animation
   useEffect(() => {
     if (service) {
       setRenderService(service)
     }
   }, [service])
+
+  // Manage body scroll locking when opened
+  useEffect(() => {
+    if (isOpen) {
+      setIsExiting(false)
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isOpen])
 
   const triggerClose = () => {
     if (isExiting) return
@@ -22,9 +37,10 @@ export default function ServiceModal({
     setTimeout(() => {
       setIsExiting(false)
       if (onClose) onClose()
-    }, 480) // Matches the 480ms exit animation duration
+    }, 480) // Matches 480ms exit animation duration
   }
 
+  // Handle Escape keypress
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && isOpen && !isExiting) {
@@ -33,15 +49,10 @@ export default function ServiceModal({
     }
 
     if (isOpen) {
-      setIsExiting(false)
-      document.body.style.overflow = 'hidden'
       window.addEventListener('keydown', handleKeyDown)
-    } else {
-      document.body.style.overflow = ''
     }
 
     return () => {
-      document.body.style.overflow = ''
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [isOpen, isExiting])
@@ -366,7 +377,6 @@ export default function ServiceModal({
         }
       `}</style>
 
-      {}
       <div className="primefix-3d-modal" onClick={(e) => e.stopPropagation()}>
         <div
           className="primefix-modal-left"

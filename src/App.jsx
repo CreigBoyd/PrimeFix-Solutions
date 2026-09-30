@@ -12,6 +12,7 @@ import MobileActionBar from './components/MobileActionBar'
 import ScrollToTop from './components/ScrollToTop'
 import LoadingSpinner from './components/LoadingSpinner'
 import { RootContextMenu, MenuCard } from './components/ContextMenu'
+import logoSvg from './assets/primefix-solutions-logo-dark-bg.svg'
 
 // Centralized Route Registry
 import { pageImports } from './routes/pageRegistry'
@@ -105,10 +106,19 @@ export default function App() {
       <Footer />
       <Chatbot />
       <MobileActionBar onOpenEstimate={handleOpenEstimate} />
-      <RootContextMenu
-        holdMs={650}
-        menu={() => <MenuCard items={siteMenuItems} size={1.0} maxWidthRem={22} enableTextSelection={false} />}
-      />
+     <RootContextMenu
+  holdMs={650}
+  menu={() => (
+    <MenuCard
+      logo={logoSvg}
+      title="PrimeFix Solutions"
+      items={siteMenuItems}
+      size={1.0}
+      maxWidthRem={22}
+      enableTextSelection={false}
+    />
+  )}
+/>
     </>
   )
 }

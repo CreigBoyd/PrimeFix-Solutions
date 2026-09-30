@@ -36,12 +36,23 @@ export default function Header() {
   const navigate = useNavigate()
 
   const isHome = location.pathname === '/'
-  const closeMenu = () => setMenuOpen(false)
+
+  // Closes mobile drawer and removes focus so desktop dropdowns collapse instantly
+  const closeMenu = () => {
+    setMenuOpen(false)
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur()
+    }
+  }
+
+  // Automatically close and clear focus whenever the route changes
+  useEffect(() => {
+    closeMenu()
+  }, [location.pathname])
 
   useEffect(() => {
     if (!isHome) return
 
-    // Collect active anchor links dynamically for the intersection observer
     const anchorHrefs = ['#services', '#portfolio', '#process', '#contact']
     const sections = anchorHrefs
       .map((href) => document.querySelector(href))
@@ -175,6 +186,7 @@ export default function Header() {
                       key={item.href}
                       to={item.href}
                       className="dropdown-item"
+                      onClick={closeMenu}
                       onMouseEnter={item.importKey ? pageImports[item.importKey] : undefined}
                       onTouchStart={item.importKey ? pageImports[item.importKey] : undefined}
                     >

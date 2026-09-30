@@ -1,3 +1,4 @@
+// src/components/Services.jsx
 import { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import ServiceModal from './ServiceModal'
@@ -82,14 +83,13 @@ const SERVICES = [
 
 export default function Services() {
   const [activeService, setActiveService] = useState(null)
-  const [isClosedRecently, setIsClosedRecently] = useState(false)
   const lastClosedAt = useRef(0)
 
   const handleCardClick = (e, service) => {
     if (e && e.stopPropagation) e.stopPropagation()
 
-    // Prevent re-opening if modal is open, closing, or closed under 600ms ago
-    if (activeService || isClosedRecently || Date.now() - lastClosedAt.current < 600) {
+    // Block opening if already open or closed less than 400ms ago (swallows click bleed-through)
+    if (activeService || Date.now() - lastClosedAt.current < 400) {
       return
     }
 
@@ -98,22 +98,16 @@ export default function Services() {
 
   const handleClose = () => {
     lastClosedAt.current = Date.now()
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur()
+    }
     setActiveService(null)
-    setIsClosedRecently(true)
-
-    // Keep pointer events disabled for 600ms after closing to swallow mobile tap delay
-    setTimeout(() => {
-      setIsClosedRecently(false)
-    }, 600)
   }
-
-  const isLocked = Boolean(activeService) || isClosedRecently
 
   return (
     <section id="services">
       <style>{`
         .service-card-interactive { cursor: pointer; transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease; overflow: hidden; padding: 0 !important; }
-        .service-card-interactive.card-locked { pointer-events: none !important; }
         .service-card-image-wrap { width: 100%; height: 160px; overflow: hidden; position: relative; }
         .service-card-image-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
         .service-card-interactive:hover .service-card-image-wrap img { transform: scale(1.05); }
@@ -149,7 +143,7 @@ export default function Services() {
         <div className="services-grid">
           {SERVICES.map((service) => (
             <div 
-              className={`service-card service-card-interactive ${isLocked ? 'card-locked' : ''}`} 
+              className="service-card service-card-interactive" 
               key={service.title}
               onClick={(e) => handleCardClick(e, service)}
               role="button"
@@ -164,13 +158,13 @@ export default function Services() {
             >
               <div className="service-card-image-wrap">
                 <img 
-  src={service.imageUrl} 
-  alt={`PrimeFix Solutions ${service.title} service`} 
-  loading="lazy" 
-  decoding="async"
-  width="800"
-  height="533"
-/>
+                  src={service.imageUrl} 
+                  alt={`PrimeFix Solutions ${service.title} service`} 
+                  loading="lazy" 
+                  decoding="async"
+                  width="800"
+                  height="533"
+                />
               </div>
               <div className="service-card-content">
                 <div className="icon-badge">{service.icon}</div>
