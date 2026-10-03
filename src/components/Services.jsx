@@ -106,32 +106,6 @@ export default function Services() {
 
   return (
     <section id="services">
-      <style>{`
-        .service-card-interactive { cursor: pointer; transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease; overflow: hidden; padding: 0 !important; }
-        .service-card-image-wrap { width: 100%; height: 160px; overflow: hidden; position: relative; }
-        .service-card-image-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
-        .service-card-interactive:hover .service-card-image-wrap img { transform: scale(1.05); }
-        .service-card-content { padding: 24px; display: flex; flex-direction: column; flex-grow: 1; }
-        .service-card-interactive:hover { transform: translateY(-4px); border-color: var(--teal-bright); box-shadow: 0 20px 40px rgba(14, 42, 56, 0.14); }
-        .service-card-action { margin-top: 14px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; font-weight: 700; color: var(--teal-deep); background: none; border: none; padding: 0; transition: gap 0.2s ease, color 0.2s ease; }
-        :root[data-theme="dark"] .service-card-action { color: var(--teal-bright); }
-        .service-card-interactive:hover .service-card-action { gap: 10px; }
-        
-        .services-text-link-bar { margin-top: 40px; display: flex; justify-content: center; align-items: center; text-align: center; }
-        .services-text-link { display: inline-flex; align-items: center; gap: 8px; color: #ffffff; font-size: 1.05rem; font-weight: 600; text-decoration: none; transition: color 0.2s ease, gap 0.2s ease; }
-        .services-text-link:hover { color: var(--teal, #128077); gap: 12px; text-decoration: underline; text-underline-offset: 4px; }
-        
-        .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-        @media(max-width: 900px) { .services-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media(max-width: 600px) { .services-grid { grid-template-columns: 1fr; } }
-        .service-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; }
-        .icon-badge { width: 44px; height: 44px; border-radius: 10px; background: rgba(18,128,119,0.1); color: var(--teal); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
-        .service-card h3 { font-size: 1.25rem; margin-bottom: 10px; }
-        .service-card p { font-size: 0.9rem; margin-bottom: 16px; }
-        .service-card ul { list-style: none; padding: 0; margin: 0 0 20px 0; display: flex; flex-direction: column; gap: 6px; }
-        .service-card li { font-size: 0.85rem; color: var(--text-soft); position: relative; padding-left: 16px; }
-        .service-card li::before { content: "•"; position: absolute; left: 0; color: var(--teal); }
-      `}</style>
 
       <div className="wrap">
         <div className="section-head">

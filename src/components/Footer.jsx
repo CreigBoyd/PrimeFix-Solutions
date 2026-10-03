@@ -1,7 +1,18 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import logo from '../assets/primefix-solutions-logo-dark-bg.svg'
+import { SITE, telHref, mailHref } from '../config/site'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faFacebookF, faInstagram, faLinkedinIn, faXTwitter } from '@fortawesome/free-brands-svg-icons'
+
+const SOCIAL_DEFS = [
+  { key: 'facebook', label: 'Facebook', icon: faFacebookF },
+  { key: 'instagram', label: 'Instagram', icon: faInstagram },
+  { key: 'linkedin', label: 'LinkedIn', icon: faLinkedinIn },
+  { key: 'x', label: 'X (Twitter)', icon: faXTwitter },
+]
 
 export default function Footer() {
+  const socialLinks = SOCIAL_DEFS.map((d) => ({ ...d, url: SITE.social[d.key] })).filter((d) => d.url)
   const location = useLocation()
   const navigate = useNavigate()
   const isHome = location.pathname === '/'
@@ -42,6 +53,7 @@ export default function Footer() {
               <img
                 src={logo}
                 alt="PrimeFix Solutions Logo"
+                loading="lazy"
                 className="primefix-footer-logo"
                 width="42"
                 height="42"
@@ -49,23 +61,15 @@ export default function Footer() {
               <strong>PrimeFix Solutions</strong>
             </Link>
             <p>Carpentry, roofing, repairs, painting, and grounds work — every trade, one team.</p>
-            <div className="footer-social">
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
-                <i className="fa fa-twitter" aria-hidden="true"></i>
-              </a>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-                <i className="fa fa-facebook" aria-hidden="true"></i>
-              </a>
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-                <i className="fa fa-github" aria-hidden="true"></i>
-              </a>
-              <a href="https://stackoverflow.com" target="_blank" rel="noopener noreferrer" aria-label="Stack Overflow">
-                <i className="fa fa-stack-overflow" aria-hidden="true"></i>
-              </a>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-                <i className="fa fa-linkedin" aria-hidden="true"></i>
-              </a>
-            </div>
+            {socialLinks.length > 0 && (
+              <div className="footer-social">
+                {socialLinks.map(({ key, label, icon, url }) => (
+                  <a key={key} href={url} target="_blank" rel="noopener noreferrer" aria-label={label}>
+                    <FontAwesomeIcon icon={icon} />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
           <div className="footer-links">
             <div>
@@ -81,8 +85,8 @@ export default function Footer() {
             <div>
               <h5>Contact</h5>
               <ul>
-                <li><a href="tel:5550102000">(555) 010-2000</a></li>
-                <li><a href="mailto:hello@primefixsolutions.com">hello@primefixsolutions.com</a></li>
+                <li><a href={telHref}>{SITE.phoneDisplay}</a></li>
+                <li><a href={mailHref}>{SITE.email}</a></li>
                 <li><span>Mon–Sat, 7am–6pm</span></li>
               </ul>
             </div>

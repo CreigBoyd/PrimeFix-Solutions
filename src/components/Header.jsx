@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import logo from '../assets/primefix-solutions-logo-dark-bg.svg'
 import JellyButton from './JellyButton'
 import { pageImports } from '../routes/pageRegistry'
+import { SITE, telHref } from '../config/site'
 
 const NAV_GROUPS = [
   {
@@ -50,42 +51,50 @@ export default function Header() {
     closeMenu()
   }, [location.pathname])
 
+  // Scroll-spy. Home is lazy-loaded, so its sections may not exist yet when this
+  // effect first runs; retry briefly until they mount.
   useEffect(() => {
-    if (!isHome) return
+    if (!isHome) {
+      setActiveId('')
+      return
+    }
 
     const anchorHrefs = ['#services', '#portfolio', '#process', '#contact']
-    const sections = anchorHrefs
-      .map((href) => document.querySelector(href))
-      .filter(Boolean)
+    let observer
+    let timer
+    let attempts = 0
 
-    if (!sections.length) return
+    const attach = () => {
+      const sections = anchorHrefs.map((href) => document.querySelector(href)).filter(Boolean)
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveId(`#${entry.target.id}`)
-          }
-        })
-      },
-      { rootMargin: '-45% 0px -50% 0px', threshold: 0 }
-    )
+      if (!sections.length) {
+        if (attempts++ < 30) timer = window.setTimeout(attach, 150)
+        return
+      }
 
-    sections.forEach((section) => observer.observe(section))
-    return () => observer.disconnect()
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) setActiveId(`#${entry.target.id}`)
+          })
+        },
+        { rootMargin: '-45% 0px -50% 0px', threshold: 0 }
+      )
+      sections.forEach((section) => observer.observe(section))
+    }
+
+    attach()
+    return () => {
+      window.clearTimeout(timer)
+      observer?.disconnect()
+    }
   }, [isHome])
 
   const handleNavClick = (e, href) => {
     e.preventDefault()
     closeMenu()
     if (!isHome) {
-      navigate('/')
-      setTimeout(() => {
-        const targetSection = document.querySelector(href)
-        if (targetSection) {
-          targetSection.scrollIntoView({ behavior: 'smooth' })
-        }
-      }, 100)
+      navigate(`/${href}`)
     } else {
       const targetSection = document.querySelector(href)
       if (targetSection) {
@@ -109,13 +118,7 @@ export default function Header() {
     e.preventDefault()
     closeMenu()
     if (!isHome) {
-      navigate('/')
-      setTimeout(() => {
-        const contactSection = document.querySelector('#contact')
-        if (contactSection) {
-          contactSection.scrollIntoView({ behavior: 'smooth' })
-        }
-      }, 100)
+      navigate('/#contact')
     } else {
       const contactSection = document.querySelector('#contact')
       if (contactSection) {
@@ -200,7 +203,7 @@ export default function Header() {
         </nav>
 
         <div className="header-actions">
-          <a className="phone-link" href="tel:5550102000">(555) 010-2000</a>
+          <a className="phone-link" href={telHref}>{SITE.phoneDisplay}</a>
           <JellyButton href="#contact" onClick={handleEstimateClick}>
             Get a free estimate
           </JellyButton>
@@ -253,7 +256,7 @@ export default function Header() {
             )}
           </div>
         ))}
-        <a href="tel:5550102000" onClick={closeMenu}><strong>(555) 010-2000</strong></a>
+        <a href={telHref} onClick={closeMenu}><strong>{SITE.phoneDisplay}</strong></a>
       </div>
     </header>
   )

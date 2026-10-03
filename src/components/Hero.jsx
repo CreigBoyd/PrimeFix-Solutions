@@ -32,7 +32,7 @@ export default function Hero() {
             width="800"
             height="450"
             loading="eager"
-            fetchpriority="high"
+            fetchPriority="high"
             decoding="async"
           />
         </div>

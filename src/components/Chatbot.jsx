@@ -1,155 +1,146 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react'
+import { postJSON } from '../utils/api'
+import { isValidPhone } from '../utils/validation'
+import { SITE, telHref } from '../config/site'
+
+const SERVICES = ['General Maintenance', 'Carpentry', 'Roofing', 'Painting & Finishing', 'Yard & Grounds', 'Emergency Repair']
+
+const GREETING = [
+  { sender: 'bot', text: 'Hi! Welcome to PrimeFix. I can help you request a quote or a call back from our team.' },
+  { sender: 'bot', text: 'What service do you need help with today?' },
+]
+
+// Steps: SERVICE -> ZIP -> DETAILS -> NAME -> PHONE -> SUBMITTING -> COMPLETE | FAILED
+const PROMPTS = {
+  ZIP: 'What is the zip code for the property?',
+  DETAILS: 'Thanks! Briefly describe the work or repairs that need to be done.',
+  NAME: 'Almost done. What is your name?',
+  PHONE: 'And the best phone number to reach you at?',
+}
 
 export default function LeadChatbot() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [showTeaser, setShowTeaser] = useState(true);
-  const [step, setStep] = useState('GREETING'); // GREETING, SERVICE, ZIP, DETAILS, CONTACT, COMPLETE
-  
-  // Lead information state
-  const [lead, setLead] = useState({
-    service: '',
-    zipCode: '',
-    details: '',
-    name: '',
-    phone: ''
-  });
+  const [isOpen, setIsOpen] = useState(false)
+  const [showTeaser, setShowTeaser] = useState(true)
+  const [step, setStep] = useState('SERVICE')
+  const [lead, setLead] = useState({ service: '', zipCode: '', details: '', name: '', phone: '' })
+  const [inputVal, setInputVal] = useState('')
+  const [messages, setMessages] = useState(GREETING)
+  const chatEndRef = useRef(null)
 
-  const [inputVal, setInputVal] = useState('');
-  const [messages, setMessages] = useState([
-    {
-      sender: 'bot',
-      text: "Hi! Welcome to PrimeFix. I can help you get a quick quote or set up a call back from a technician."
-    },
-    {
-      sender: 'bot',
-      text: "What service do you need help with today?"
-    }
-  ]);
-
-  const chatEndRef = useRef(null);
-
-  // Auto-dismiss teaser bubble after 6 seconds
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowTeaser(false);
-    }, 6000);
+    const timer = setTimeout(() => setShowTeaser(false), 6000)
+    return () => clearTimeout(timer)
+  }, [])
 
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Auto-scroll to latest message
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isOpen]);
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, isOpen])
 
-  // Handle preset service button clicks
-  const handleSelectService = (serviceName) => {
-    setLead((prev) => ({ ...prev, service: serviceName }));
-    setMessages((prev) => [
-      ...prev,
-      { sender: 'user', text: serviceName },
-      { sender: 'bot', text: `Got it, ${serviceName}. What is the zip code for the property?` }
-    ]);
-    setStep('ZIP');
-  };
+  const say = (...bot) => bot.map((text) => ({ sender: 'bot', text }))
 
-  // Handle user typing input
-  const handleSend = (e) => {
-    e.preventDefault();
-    if (!inputVal.trim()) return;
+  const handleSelectService = (service) => {
+    setLead((prev) => ({ ...prev, service }))
+    setMessages((prev) => [...prev, { sender: 'user', text: service }, ...say(PROMPTS.ZIP)])
+    setStep('ZIP')
+  }
 
-    const userText = inputVal.trim();
-    setInputVal('');
-
-    // Append user message
-    const updatedMessages = [...messages, { sender: 'user', text: userText }];
-    setMessages(updatedMessages);
-
-    // Process step transition
-    if (step === 'ZIP') {
-      setLead((prev) => ({ ...prev, zipCode: userText }));
-      setStep('DETAILS');
-      setMessages([
-        ...updatedMessages,
-        { sender: 'bot', text: 'Thanks! Can you briefly describe what work or repairs need to be done?' }
-      ]);
-    } else if (step === 'DETAILS') {
-      setLead((prev) => ({ ...prev, details: userText }));
-      setStep('CONTACT');
-      setMessages([
-        ...updatedMessages,
-        { sender: 'bot', text: 'Almost done! What is your Full Name and the best Phone Number to reach you at?' }
-      ]);
-    } else if (step === 'CONTACT') {
-      // Final step: parse name/phone and submit
-      setLead((prev) => ({ ...prev, name: userText }));
-      setStep('SUBMITTING');
-
-      const finalLeadData = { ...lead, name: userText };
-
-      // Background submission to Web3Forms / API
-      submitLeadToEmail(finalLeadData);
-
-      // Instant confirmation response shown to client
-      setTimeout(() => {
-        setStep('COMPLETE');
-        setMessages([
-          ...updatedMessages,
-          {
-            sender: 'bot',
-            text: `✅ Request Received! Thank you, ${userText.split(' ')[0] || 'there'}. We have logged your project details.`
-          },
-          {
-            sender: 'bot',
-            text: `📞 A technician will review your request and call you back first thing tomorrow morning!`
-          }
-        ]);
-      }, 600);
-    }
-  };
-
-  // Background API submit (Web3Forms)
-  const submitLeadToEmail = async (data) => {
+  const submitLead = async (finalLead) => {
+    setStep('SUBMITTING')
     try {
-      await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          access_key: import.meta.env.VITE_WEB3FORMS_ACCESS_KEY,
-          subject: `Chatbot Lead: ${data.service} - ${data.name}`,
-          from_name: 'Chatbot Intake Engine',
-          ...data
-        })
-      });
+      await postJSON('send-mail.php', {
+        name: finalLead.name,
+        phone: finalLead.phone,
+        service: `Chatbot: ${finalLead.service}`,
+        message: `Zip code: ${finalLead.zipCode}\n\n${finalLead.details}`,
+      })
+      setMessages((prev) => [
+        ...prev,
+        ...say(
+          `Request received. Thank you, ${finalLead.name.split(' ')[0]}!`,
+          'Our team will review the details and get back to you, usually within 24 hours.'
+        ),
+      ])
+      setStep('COMPLETE')
     } catch (err) {
-      console.error('Failed to dispatch chatbot lead notification', err);
+      // Never claim success when the request did not go through.
+      setMessages((prev) => [
+        ...prev,
+        ...say(`Sorry, that didn't go through. ${err.message}`),
+      ])
+      setStep('FAILED')
     }
-  };
+  }
+
+  const handleSend = (e) => {
+    e.preventDefault()
+    const text = inputVal.trim()
+    if (!text) return
+
+    const withUser = [...messages, { sender: 'user', text }]
+
+    if (step === 'ZIP') {
+      if (!/^\d{5}(-\d{4})?$/.test(text)) {
+        setMessages([...withUser, ...say('Please enter a valid 5-digit zip code.')])
+        setInputVal('')
+        return
+      }
+      setLead((prev) => ({ ...prev, zipCode: text }))
+      setMessages([...withUser, ...say(PROMPTS.DETAILS)])
+      setStep('DETAILS')
+    } else if (step === 'DETAILS') {
+      setLead((prev) => ({ ...prev, details: text }))
+      setMessages([...withUser, ...say(PROMPTS.NAME)])
+      setStep('NAME')
+    } else if (step === 'NAME') {
+      setLead((prev) => ({ ...prev, name: text }))
+      setMessages([...withUser, ...say(PROMPTS.PHONE)])
+      setStep('PHONE')
+    } else if (step === 'PHONE') {
+      if (!isValidPhone(text)) {
+        setMessages([...withUser, ...say('That phone number looks too short. Please include the area code.')])
+        setInputVal('')
+        return
+      }
+      const finalLead = { ...lead, phone: text }
+      setLead(finalLead)
+      setMessages(withUser)
+      submitLead(finalLead)
+    }
+    setInputVal('')
+  }
+
+  const placeholders = {
+    ZIP: 'Property zip code…',
+    DETAILS: 'Describe your project…',
+    NAME: 'Your name…',
+    PHONE: 'Your phone number…',
+  }
+  const showInput = placeholders[step] !== undefined
 
   return (
     <div className="chatbot-wrapper" onContextMenu={(e) => e.stopPropagation()}>
-      {/* Floating Teaser & Launcher Trigger */}
       {!isOpen && (
         <div className="chat-launcher-container" onContextMenu={(e) => e.stopPropagation()}>
-          {/* Compact Auto-Dismissing Teaser Bubble */}
           {showTeaser && (
-            <div 
-              className="chat-teaser-bubble compact" 
+            <div
+              className="chat-teaser-bubble compact"
               onClick={() => setIsOpen(true)}
+              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setIsOpen(true)}
               role="button"
               tabIndex={0}
             >
               <div className="teaser-content">
-                <span className="teaser-badge">24/7 Response</span>
-                <p className="teaser-text">⚡ Check technician availability & get instant quotes!</p>
+                <span className="teaser-badge">Free Quotes</span>
+                <p className="teaser-text">⚡ Get a quick estimate in under 2 minutes</p>
               </div>
-              <button 
+              <button
                 type="button"
                 className="dismiss-teaser-btn"
                 onClick={(e) => {
-                  e.stopPropagation();
-                  setShowTeaser(false);
+                  e.stopPropagation()
+                  setShowTeaser(false)
                 }}
+                aria-label="Dismiss"
                 title="Dismiss"
               >
                 ×
@@ -164,33 +155,29 @@ export default function LeadChatbot() {
         </div>
       )}
 
-      {/* Chat Window */}
       {isOpen && (
-        <div className="chat-window" onContextMenu={(e) => e.stopPropagation()}>
-          {/* Header */}
+        <div className="chat-window" role="dialog" aria-label="PrimeFix quote assistant" onContextMenu={(e) => e.stopPropagation()}>
           <div className="chat-header">
             <div className="chat-title">
               <span className="online-indicator"></span>
               <div>
                 <h4>PrimeFix Assistant</h4>
-                <p>24/7 Fast Response Bot</p>
+                <p>Quick quote requests</p>
               </div>
             </div>
-            <button className="close-chat-btn" onClick={() => setIsOpen(false)}>×</button>
+            <button className="close-chat-btn" onClick={() => setIsOpen(false)} aria-label="Close chat">×</button>
           </div>
 
-          {/* Messages Container */}
-          <div className="chat-messages">
+          <div className="chat-messages" aria-live="polite">
             {messages.map((msg, index) => (
               <div key={index} className={`chat-bubble ${msg.sender}`}>
                 {msg.text}
               </div>
             ))}
 
-            {/* Service Quick-Select Buttons */}
-            {step === 'GREETING' && (
+            {step === 'SERVICE' && (
               <div className="service-options">
-                {['General Maintenance', 'Commercial Repair', 'Building Inspection', 'Emergency Repair'].map((svc) => (
+                {SERVICES.map((svc) => (
                   <button key={svc} onClick={() => handleSelectService(svc)} className="service-chip-btn">
                     {svc}
                   </button>
@@ -198,41 +185,34 @@ export default function LeadChatbot() {
               </div>
             )}
 
+            {step === 'SUBMITTING' && <div className="chat-bubble bot">Sending…</div>}
             <div ref={chatEndRef} />
           </div>
 
-          {/* Input Bar */}
-          {step !== 'COMPLETE' && (
+          {showInput && (
             <form onSubmit={handleSend} className="chat-input-form">
               <input
-                type="text"
-                placeholder={
-                  step === 'ZIP'
-                    ? 'Enter property zip code...'
-                    : step === 'DETAILS'
-                    ? 'Describe your project...'
-                    : step === 'CONTACT'
-                    ? 'Your Name & Phone Number...'
-                    : 'Type a message...'
-                }
+                type={step === 'PHONE' ? 'tel' : 'text'}
+                inputMode={step === 'ZIP' ? 'numeric' : undefined}
+                placeholder={placeholders[step]}
+                aria-label={placeholders[step]}
                 value={inputVal}
+                maxLength={step === 'DETAILS' ? 1000 : 100}
                 onChange={(e) => setInputVal(e.target.value)}
+                autoFocus
               />
-              <button type="submit" disabled={!inputVal.trim() && step !== 'GREETING'}>
-                Send
-              </button>
+              <button type="submit" disabled={!inputVal.trim()}>Send</button>
             </form>
           )}
 
-          {/* Completion Footer */}
-          {step === 'COMPLETE' && (
+          {(step === 'COMPLETE' || step === 'FAILED') && (
             <div className="chat-complete-footer">
-              <p>Need immediate emergency help?</p>
-              <a href="tel:5550000000" className="call-now-link">Call (555) 000-0000 Now</a>
+              <p>{step === 'FAILED' ? 'Prefer to talk to someone now?' : 'Need immediate help?'}</p>
+              <a href={telHref} className="call-now-link">Call {SITE.phoneDisplay}</a>
             </div>
           )}
         </div>
       )}
     </div>
-  );
+  )
 }

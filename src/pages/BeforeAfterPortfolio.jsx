@@ -3,8 +3,9 @@ import cabinetOld from '../assets/slider-images/Cabinet-Old.webp'
 import cabinetNew from '../assets/slider-images/Cabinet-New.webp'
 import deckOld from '../assets/slider-images/Deck-Old.webp'
 import deckNew from '../assets/slider-images/Deck-New.webp'
-import roofOld from '../assets/slider-images/Roof-Old.jpg'
+import roofOld from '../assets/slider-images/Roof-Old.webp'
 import roofNew from '../assets/slider-images/Roof-New.webp'
+import usePageTitle from '../hooks/usePageTitle'
 
 const PROJECTS = [
   {
@@ -78,6 +79,8 @@ function ComparisonSlider({ beforeImg, afterImg, title }) {
       <img
         src={afterImg}
         alt={`${title} After`}
+        loading="lazy"
+        decoding="async"
         style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }}
       />
       <span style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(18, 128, 119, 0.85)', color: '#fff', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, zIndex: 2 }}>
@@ -99,6 +102,8 @@ function ComparisonSlider({ beforeImg, afterImg, title }) {
         <img
           src={beforeImg}
           alt={`${title} Before`}
+          loading="lazy"
+          decoding="async"
           style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
         />
         <span style={{ position: 'absolute', top: '16px', left: '16px', background: 'rgba(20, 30, 45, 0.85)', color: '#fff', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, zIndex: 2 }}>
@@ -151,6 +156,7 @@ function ComparisonSlider({ beforeImg, afterImg, title }) {
 }
 
 export default function BeforeAfterPortfolio() {
+  usePageTitle('Before & After Portfolio', 'Drag-to-compare before and after photos of our carpentry, roofing and finishing projects.')
   const [activeCategory, setActiveCategory] = useState('All')
   const categories = ['All', 'Carpentry', 'Roofing', 'Painting & Finishing']
 
@@ -163,7 +169,7 @@ export default function BeforeAfterPortfolio() {
       <div className="wrap">
         <div className="section-head" style={{ textAlign: 'center', maxWidth: '700px', margin: '0 auto 40px' }}>
           <span className="kicker">Interactive Project Portfolio</span>
-          <h2>Drag to reveal the transformations.</h2>
+          <h1>Drag to reveal the transformations.</h1>
           <p>See the dramatic difference professional craftsmanship makes. Slide back and forth across real project photos below.</p>
         </div>
 

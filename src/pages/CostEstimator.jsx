@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import usePageTitle from '../hooks/usePageTitle'
+import { postJSON } from '../utils/api'
+import { isValidPhone } from '../utils/validation'
 
 const ESTIMATE_CONFIGS = {
   'Carpentry & Decks': {
@@ -44,6 +47,8 @@ const ESTIMATE_CONFIGS = {
 }
 
 export default function CostEstimator() {
+  usePageTitle('Instant Cost Estimator', 'Get an instant ballpark price range for carpentry, roofing, painting and repairs, then request a firm quote.')
+  const [formError, setFormError] = useState('')
   const [selectedService, setSelectedService] = useState('Carpentry & Decks')
   const [quantity, setQuantity] = useState(ESTIMATE_CONFIGS['Carpentry & Decks'].defaultVal)
   const [submitting, setSubmitting] = useState(false)
@@ -65,30 +70,28 @@ export default function CostEstimator() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!contactInfo.name || !contactInfo.phone) {
-      alert('Please enter your name and phone number so we can verify your estimate.')
+    if (!contactInfo.name.trim() || !isValidPhone(contactInfo.phone)) {
+      setFormError('Please enter your name and a valid phone number so we can verify your estimate.')
       return
     }
 
     setSubmitting(true)
+    setFormError('')
     try {
-      const formData = new FormData()
-      formData.append('form_type', 'Instant Cost Estimator')
-      formData.append('service', selectedService)
-      formData.append('quantity', quantity.toString())
-      formData.append('estimatedRange', `$${lowEnd.toLocaleString()} – $${highEnd.toLocaleString()}`)
-      formData.append('name', contactInfo.name)
-      formData.append('phone', contactInfo.phone)
-      formData.append('email', contactInfo.email)
-
-      await fetch('send-mail.php', {
-        method: 'POST',
-        body: formData
+      await postJSON('send-mail.php', {
+        name: contactInfo.name,
+        phone: contactInfo.phone,
+        email: contactInfo.email,
+        service: `Instant Cost Estimator: ${selectedService}`,
+        message: [
+          `Service: ${selectedService}`,
+          `Quantity: ${quantity} ${config.unit || ''}`.trim(),
+          `Estimated range shown: $${lowEnd.toLocaleString()} – $${highEnd.toLocaleString()}`,
+        ].join('\n'),
       })
       setSubmitted(true)
     } catch (err) {
-      console.error(err)
-      setSubmitted(true)
+      setFormError(err.message)
     } finally {
       setSubmitting(false)
     }
@@ -99,7 +102,7 @@ export default function CostEstimator() {
       <div className="wrap" style={{ maxWidth: '850px' }}>
         <div className="section-head" style={{ textAlign: 'center', marginBottom: '40px' }}>
           <span className="kicker">Instant Project Estimator</span>
-          <h2>Get an instant ballpark estimate.</h2>
+          <h1>Get an instant ballpark estimate.</h1>
           <p>Select your project type and size below to see estimated pricing instantly. No waiting around.</p>
         </div>
 
@@ -211,6 +214,9 @@ export default function CostEstimator() {
                 </div>
               </div>
 
+              {formError && (
+                <p role="alert" style={{ color: '#f87171', fontSize: '0.85rem', marginBottom: '12px' }}>{formError}</p>
+              )}
               <button
                 type="submit"
                 disabled={submitting}

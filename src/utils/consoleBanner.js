@@ -42,7 +42,7 @@ export function initConsoleBanner() {
 
   // 2. Log the text banner on the next line
   console.log(
-    `%c PrimeFix Solutions %c Building & Property Maintenance\n%cLooking for website development or custom maintenance solutions? Reach out at hello@primefixsolutions.com`,
+    `%c PrimeFix Solutions %c Building & Property Maintenance\n%cLooking for website development or custom maintenance solutions? Reach out at hello@primefix.vip`,
     tagStyle,
     'color: #0369a1; font-weight: bold; font-size: 12px;',
     subTextStyle

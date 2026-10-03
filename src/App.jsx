@@ -9,6 +9,7 @@ import Header from './components/Header'
 import Footer from './components/Footer'
 import Chatbot from './components/Chatbot'
 import MobileActionBar from './components/MobileActionBar'
+import CookieConsent from './components/CookieConsent'
 import ScrollToTop from './components/ScrollToTop'
 import LoadingSpinner from './components/LoadingSpinner'
 import { RootContextMenu, MenuCard } from './components/ContextMenu'
@@ -16,6 +17,7 @@ import logoSvg from './assets/primefix-solutions-logo-dark-bg.svg'
 
 // Centralized Route Registry
 import { pageImports } from './routes/pageRegistry'
+import { telHref, mailHref } from './config/site'
 
 // Dynamic Route Chunks linked to Registry
 const Home = lazy(pageImports.home)
@@ -35,13 +37,13 @@ export default function App() {
       menuItemType: 'button',
       labelText: 'Call us',
       icon: { faIcon: faPhone },
-      onClick: () => { window.location.href = 'tel:5550102000' },
+      onClick: () => { window.location.href = telHref },
     },
     {
       menuItemType: 'button',
       labelText: 'Email us',
       icon: { faIcon: faEnvelope },
-      onClick: () => { window.location.href = 'mailto:hello@primefixsolutions.com' },
+      onClick: () => { window.location.href = mailHref },
     },
     {
       menuItemType: 'button',
@@ -105,6 +107,7 @@ export default function App() {
       </main>
       <Footer />
       <Chatbot />
+      <CookieConsent />
       <MobileActionBar onOpenEstimate={handleOpenEstimate} />
      <RootContextMenu
   holdMs={650}

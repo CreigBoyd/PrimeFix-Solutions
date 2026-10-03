@@ -1,138 +1,39 @@
-# PrimeFix Solutions — React + PHPMailer
+# PrimeFix Solutions website
 
-Converted from the original static HTML/CSS site, now with:
+React + Vite front end, PHP (PHPMailer) back end for forms.
 
-- A component-based React (Vite) frontend
-- A custom eased smooth-scroll + scroll-spy nav
-- A working contact form that emails you via **PHPMailer**, submitted with
-  `fetch` so the page never reloads
-- A newsletter signup banner, wired to the same backend
-
-## Project layout
-
-```
-src/
-  main.jsx, App.jsx, style.css
-  assets/            images
-  components/
-    Header.jsx       sticky nav, mobile menu, scroll-spy
-    Hero.jsx
-    Services.jsx
-    Process.jsx
-    Portfolio.jsx
-    Testimonials.jsx
-    Contact.jsx      the estimate-request form (fetch → PHP)
-    Newsletter.jsx    the subscribe banner (fetch → PHP)
-    Footer.jsx
-  utils/
-    smoothScroll.js  eased scroll + global "#" link handler
-
-server/               <- separate PHP backend, deployed alongside or
-  bootstrap.php          behind the same domain as the built frontend
-  send-mail.php       contact form endpoint
-  subscribe.php       newsletter endpoint
-  config.example.php  copy to config.php and fill in your SMTP details
-  composer.json
-```
-
-The frontend and the PHP backend are two separate things that both need to
-run — Vite doesn't execute PHP. In production you'd typically build the
-React app to static files and serve `server/` from the same domain (or a
-subdomain/API path) so there's no cross-origin fuss.
-
-## 1. Frontend setup
-
+## Local development
 ```bash
 npm install
-cp .env.example .env      # VITE_API_BASE=/api is fine for local dev
+cp .env.example .env              # VITE_API_BASE=/api
+cp server/.env.example server/.env  # fill in SMTP_USER, SMTP_PASS, ...
+npm start                         # Vite (5173) + PHP built-in server (8000, needs php-cli)
 ```
+Vite proxies `/api/*` to the PHP server, so forms work locally.
 
-## 2. Backend setup (PHPMailer)
+## Backend (server/)
+| Endpoint | Used by | Result |
+|---|---|---|
+| `send-mail.php` | contact form, booking, cost estimator, maintenance plans, service explorer, chatbot | emails you the request; emails the visitor a confirmation if they gave an email |
+| `subscribe.php` | newsletter | saves to `storage/subscribers.csv` (deduped), emails you, sends a welcome email |
+| `submit-review.php` | review modal | queues in `storage/pending-reviews.json`, emails you a ready-to-paste JSON snippet for `src/data/reviews.json` |
 
-```bash
-cd server
-composer install
-cp config.example.php config.php
-```
+All endpoints: JSON in/out, honeypot, per-IP rate limiting, input length caps, HTML-escaped emails. A failure always returns `{ok:false,error}` and the site shows it; it never pretends a request was sent.
 
-Open `config.php` and fill in your real SMTP details — host, username,
-password, port, and the address you want form submissions delivered to.
-Any SMTP provider works (Gmail/Workspace with an app password, Outlook,
-SendGrid, Mailgun, your hosting company's own mail server, etc.).
+**Secrets live only in `server/.env` (or real environment variables), never in code.** Required: `SMTP_USER`, `SMTP_PASS`. Gmail needs an app password. Needs PHP 7.4+ with mbstring and openssl.
 
-`config.php` and `vendor/` are already in `server/.gitignore` — never commit
-real credentials.
+## Deploying
+**Option A, one PHP host (simplest, no CORS):** run `npm run build`, upload the *contents* of `dist/` to `public_html/`, and upload `server/` (including `vendor/`, `.htaccess`, `storage/`, and your `.env`) to `public_html/api/`. Build with `VITE_API_BASE=/api`. Confirm `https://yourdomain.com/api/.env` and `/api/storage/subscribers.csv` return 403/404.
 
-## 3. Run everything at once
+**Option B, static host (Vercel/Netlify) + PHP elsewhere:** Vercel cannot run PHP. Host `server/` on PHP hosting, build with `VITE_API_BASE=https://api.yourdomain.com`, and set `ALLOWED_ORIGIN=https://yourdomain.com` in `server/.env`.
 
-```bash
-npm run dev:all
-```
+Redirect HTTP to HTTPS at your host/CDN.
 
-This runs Vite and PHP's built-in server side by side in one terminal
-(labelled `WEB` and `API`), via `concurrently`. `Ctrl+C` stops both.
-
-If you'd rather run them separately (e.g. in two terminal tabs):
-
-```bash
-npm run dev       # Vite, http://localhost:5173
-npm run dev:php   # PHP built-in server, http://localhost:8000
-```
-
-Either way, submitting the contact form or the newsletter form hits
-`/api/send-mail.php` or `/api/subscribe.php`, which Vite proxies to
-`localhost:8000/send-mail.php` etc. (see the `server.proxy` block in
-`vite.config.js`). `dev:php` must be run from the **project root**, not
-inside `server/`, so that path lines up — `npm run dev:php` already does
-this for you.
-
-## 4. How the form submissions work
-
-- **Contact form** (`Contact.jsx` → `server/send-mail.php`): validates name,
-  phone, and email format, then sends two emails via PHPMailer:
-  1. **To you** (`notify_to_email` in `config.php`) — the full submission,
-     with `Reply-To` set to the visitor's address so you can just hit reply.
-  2. **To the visitor** (only if they gave an email address) — a friendly
-     confirmation summarizing what they submitted and your typical response
-     time. If this one fails to send (e.g. their address bounces), the form
-     still reports success to them, since you've already got the request —
-     the failure is just logged server-side.
-- **Newsletter** (`Newsletter.jsx` → `server/subscribe.php`): validates the
-  email, appends it to `server/subscribers.csv`, and emails you a
-  notification. This is a starting point, not a full mailing-list system —
-  for real campaigns, unsubscribe links, and deliverability at scale, swap
-  the body of `subscribe.php` for a call to a provider's API (Mailchimp,
-  ConvertKit, Brevo, etc.) instead of / in addition to the CSV.
-- Both endpoints include a hidden **honeypot field** (`company`) that's
-  invisible to real visitors via CSS but often gets filled in by bots —
-  submissions with it filled in are silently dropped.
-- Both respond with JSON (`{ ok: true }` or `{ ok: false, error: "..." }`),
-  which the React side uses to show a loading state, a success message, or
-  an inline error — no page reload at any point.
-
-## 5. Deploying
-
-1. `npm run build` → static files in `dist/`, upload those anywhere
-   (Netlify, S3, your host's `public_html`, etc.).
-2. Upload the `server/` folder (with `vendor/` and your real `config.php`,
-   generated by running `composer install` once on the server or uploading
-   `vendor/` alongside it) to a PHP-capable host.
-3. Set `VITE_API_BASE` (in `.env`, before building) to wherever `server/`
-   ends up — e.g. `https://primefixsolutions.com/api` if you map that path
-   to the `server/` folder, or a full URL on a separate domain. Rebuild
-   after changing it.
-4. In `server/config.example.php` → `config.php`, set `allowed_origin` to
-   your real domain instead of `*` once you're not testing locally anymore.
-
-## Other notes from the original conversion
-
-- **Mobile menu**: `menuOpen` state in `Header.jsx`.
-- **Smooth scroll**: `src/utils/smoothScroll.js` intercepts every in-page
-  `#` link (nav, hero buttons, footer links) with an eased scroll that
-  accounts for the sticky header's height, plus scroll-spy highlighting on
-  the desktop and mobile nav. Respects `prefers-reduced-motion`.
-- **Images**: imported as ES modules from `src/assets/` so Vite fingerprints
-  and bundles them. Move to `public/` instead if you'd rather serve them as
-  plain static files.
-- Fixed a duplicate SVG gradient `id="beamGrad"` (header vs. footer logo)
-  from the original HTML — the footer's is now `beamGradFooter`.
+## Before launch checklist
+- [ ] Replace placeholder phone `(555) 010-2000` / email: `src/config/site.js`, `server/.env` (`BUSINESS_PHONE`), `public/primefix-solutions.vcf`, `index.html` (JSON-LD + noscript)
+- [ ] Verify business address, hours and service area in the JSON-LD in `index.html`; `src/utils/booking.js` hours must match
+- [ ] Only keep claims you can back up ("Licensed & fully insured", "500+ properties", reviews)
+- [ ] Replace AI-generated hero/portfolio imagery with real project photos if they are not real work
+- [ ] Revoke the old Gmail app password that was in the earlier `config.php`
+- [ ] Send a test of every form on the live site and confirm the emails arrive
+- [ ] Submit `https://yourdomain.com/sitemap.xml` to Google Search Console

@@ -28,7 +28,10 @@ export function showToast(message, type = 'teal', duration = 3200) {
     </span>
   `;
 
-  toast.innerHTML = `${icon}<span>${message}</span>`;
+  toast.innerHTML = icon // static, trusted markup only
+  const text = document.createElement('span')
+  text.textContent = message // never interpret message as HTML
+  toast.appendChild(text)
   container.appendChild(toast);
 
   // Trigger enter animation on next repaint frame

@@ -218,7 +218,11 @@ export function RootContextMenu({ excludedRefs = [], holdMs = 650, menu }) {
 	}
 
 	useEffect(() => {
-		const shouldIgnore = (e) => isWithinAnyRef(e, excludedRefsRef.current)
+		// Never hijack the native menu on links, form fields or media (copy/paste, open in new tab, etc.).
+		const NATIVE_MENU_TARGETS = 'a[href], input, textarea, select, [contenteditable="true"], video, audio'
+		const shouldIgnore = (e) =>
+			(e.target instanceof Element && Boolean(e.target.closest(NATIVE_MENU_TARGETS))) ||
+			isWithinAnyRef(e, excludedRefsRef.current)
 
 		const onContextMenu = (e) => {
 			if (shouldIgnore(e)) return

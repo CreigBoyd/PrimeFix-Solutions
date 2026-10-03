@@ -3,9 +3,8 @@ VERSION:3.0
 FN:PrimeFix Solutions
 ORG:PrimeFix Solutions
 TITLE:Building & Property Maintenance
-TEL;TYPE=WORK,VOICE:(555) 123-4567
-EMAIL;TYPE=WORK:info@primefixsolutions.com
-URL:https://www.primefixsolutions.com
-ADR;TYPE=WORK:;;123 Main St;City;State;12345;USA
+TEL;TYPE=WORK,VOICE:(555) 010-2000
+EMAIL;TYPE=WORK:hello@primefix.vip
+URL:https://primefix.vip
 NOTE:Professional Building and Property Maintenance Services.
 END:VCARD

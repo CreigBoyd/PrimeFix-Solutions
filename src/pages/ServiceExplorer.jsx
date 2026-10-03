@@ -1,6 +1,9 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { showToast } from '../utils/toast'
+import usePageTitle from '../hooks/usePageTitle'
+import { postJSON } from '../utils/api'
+import { isValidPhone } from '../utils/validation'
 
 const CATEGORIES = [
   {
@@ -169,6 +172,8 @@ const CATEGORIES = [
 ]
 
 export default function ServiceExplorer() {
+  usePageTitle('Service Explorer', 'Browse every service we offer, build a task list and get an instant estimate range.')
+  const [formError, setFormError] = useState('')
   const [selectedCategory, setSelectedCategory] = useState(CATEGORIES[0].id)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedTasks, setSelectedTasks] = useState([])
@@ -239,12 +244,13 @@ export default function ServiceExplorer() {
 
   const handleEstimateSubmit = async (e) => {
     e.preventDefault()
-    if (!contactInfo.name || !contactInfo.phone) {
-      alert('Please enter your name and phone number.')
+    if (!contactInfo.name.trim() || !isValidPhone(contactInfo.phone)) {
+      setFormError('Please enter your name and a valid phone number.')
       return
     }
 
     setSubmitting(true)
+    setFormError('')
     try {
       const serviceTitle = activeTab === 'explorer' 
         ? `Service Explorer (${selectedTasks.length} task${selectedTasks.length === 1 ? '' : 's'})`
@@ -256,39 +262,16 @@ export default function ServiceExplorer() {
         contactInfo.notes ? `Additional Notes:\n${contactInfo.notes}` : null
       ].filter(Boolean).join('\n\n')
 
-      const res = await fetch('/api/send-mail.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: contactInfo.name,
-          phone: contactInfo.phone,
-          email: contactInfo.email,
-          service: serviceTitle,
-          message: messageContent
-        })
+      await postJSON('send-mail.php', {
+        name: contactInfo.name,
+        phone: contactInfo.phone,
+        email: contactInfo.email,
+        service: serviceTitle,
+        message: messageContent,
       })
-
-      const contentType = res.headers.get('content-type') || ''
-      
-      if (!contentType.includes('application/json')) {
-        const text = await res.text()
-        console.error('Server returned non-JSON response:', text)
-        alert('Server configuration error: The PHP backend did not return valid JSON. Check server console.')
-        return
-      }
-
-      const data = await res.json()
-
-      if (res.ok && data.ok) {
-        setSubmitted(true)
-      } else {
-        alert(data.error || 'Failed to submit request. Please try calling or texting us directly.')
-      }
+      setSubmitted(true)
     } catch (err) {
-      console.error('Estimate submission error:', err)
-      alert('Network connection error. Ensure your server environment is running PHP.')
+      setFormError(err.message)
     } finally {
       setSubmitting(false)
     }
@@ -296,62 +279,6 @@ export default function ServiceExplorer() {
 
   return (
     <div className="se-container">
-      <style>{`
-        .se-container { padding: 40px 20px 80px; max-width: 1280px; margin: 0 auto; color: var(--text, #fff); min-height: 85vh; }
-        .se-wrap { display: flex; flex-direction: column; gap: 32px; }
-        
-        .se-top-nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .se-home-link { display: inline-flex; align-items: center; gap: 8px; color: var(--text-soft, #94a3b8); text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: color 0.2s; }
-        .se-home-link:hover { color: var(--teal, #128077); }
-
-        .se-mode-switch { display: inline-flex; background: var(--bg-card, #132231); border: 1px solid var(--border, #20364d); border-radius: 30px; padding: 4px; }
-        .se-mode-btn { padding: 8px 18px; border-radius: 20px; border: none; background: transparent; color: var(--text-soft, #94a3b8); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-        .se-mode-btn.active { background: var(--teal, #128077); color: #fff; }
-
-        .se-header { text-align: center; max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; align-items: center; }
-        .se-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: rgba(18, 128, 119, 0.15); color: var(--teal-bright, #2dd4bf); border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
-        .se-pulse { width: 8px; height: 8px; background: var(--teal-bright, #2dd4bf); border-radius: 50%; box-shadow: 0 0 0 rgba(45, 212, 191, 0.4); animation: sePulse 2s infinite; }
-        @keyframes sePulse { 0% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(45, 212, 191, 0); } 100% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0); } }
-        .se-title { font-size: 2.4rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; }
-        .se-subtitle { font-size: 1rem; color: var(--text-soft, #94a3b8); line-height: 1.55; }
-        
-        .se-search-box { position: relative; width: 100%; max-width: 600px; margin-top: 8px; display: flex; align-items: center; }
-        .se-search-icon { position: absolute; left: 16px; font-size: 1.1rem; }
-        .se-input { width: 100%; padding: 14px 48px 14px 48px; background: var(--bg-card, #132231); border: 1px solid var(--border, #20364d); border-radius: 12px; color: var(--text, #fff); font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
-        .se-input:focus { border-color: var(--teal, #128077); }
-        .se-clear-btn { position: absolute; right: 14px; background: none; border: none; color: var(--text-soft, #94a3b8); cursor: pointer; font-size: 0.85rem; font-weight: 600; }
-        
-        .se-category-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 8px; }
-        @media(max-width: 900px) { .se-category-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media(max-width: 600px) { .se-category-grid { grid-template-columns: 1fr; } }
-
-        .se-cat-card { background: var(--bg-card, #132231); border: 1px solid var(--border, #20364d); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px; cursor: pointer; transition: all 0.2s ease; position: relative; text-align: left; }
-        .se-cat-card:hover { border-color: var(--teal, #128077); transform: translateY(-2px); }
-        .se-cat-card.active { border-color: var(--teal-bright, #2dd4bf); background: rgba(18, 128, 119, 0.12); box-shadow: 0 8px 24px rgba(18, 128, 119, 0.15); }
-        .se-cat-card-header { display: flex; justify-content: space-between; align-items: center; }
-        .se-cat-icon { font-size: 1.6rem; }
-        .se-cat-badge { font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 10px; background: rgba(255,255,255,0.08); color: var(--teal-bright, #2dd4bf); text-transform: uppercase; }
-        .se-cat-title { font-size: 1.05rem; font-weight: 700; color: #fff; margin: 0; }
-        .se-cat-desc { font-size: 0.82rem; color: var(--text-soft, #94a3b8); line-height: 1.4; margin: 0; }
-
-        .se-detail-panel { background: var(--bg-card, #132231); border: 1px solid var(--border, #20364d); border-radius: 16px; padding: 32px; display: flex; flex-direction: column; gap: 24px; }
-        .se-detail-head { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; border-bottom: 1px solid var(--border, #20364d); padding-bottom: 20px; }
-        .se-task-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-        .se-task-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--bg, #0a131c); border: 1px solid var(--border, #20364d); border-radius: 10px; cursor: pointer; transition: all 0.15s; }
-        .se-task-item:hover { border-color: var(--teal, #128077); }
-        .se-task-item.selected { border-color: var(--teal-bright, #2dd4bf); background: rgba(18, 128, 119, 0.18); }
-        .se-task-checkbox { width: 18px; height: 18px; accent-color: var(--teal, #128077); cursor: pointer; }
-        .se-task-label { font-size: 0.88rem; font-weight: 500; color: #fff; cursor: pointer; }
-
-        .se-sticky-bar { position: sticky; bottom: 20px; z-index: 10; background: rgba(19, 34, 49, 0.95); backdrop-filter: blur(12px); border: 1px solid var(--teal, #128077); border-radius: 16px; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; box-shadow: 0 12px 32px rgba(0,0,0,0.4); margin-top: 24px; }
-        .se-sticky-info { display: flex; flex-direction: column; gap: 2px; }
-        .se-sticky-count { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--teal-bright, #2dd4bf); font-weight: 700; }
-        .se-sticky-price { font-size: 1.3rem; font-weight: 800; color: #fff; }
-        .se-sticky-actions { display: flex; gap: 12px; align-items: center; }
-
-        .se-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 999; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .se-modal { background: var(--bg-card, #132231); border: 1px solid var(--border, #20364d); border-radius: 20px; padding: 36px; max-width: 550px; width: 100%; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
-      `}</style>
 
       <div className="se-wrap">
         {/* Top Navigation & Mode Switch */}
@@ -642,6 +569,9 @@ export default function ServiceExplorer() {
                   </div>
                 </div>
 
+                {formError && (
+                  <p role="alert" style={{ color: '#f87171', fontSize: '0.85rem', marginBottom: '12px' }}>{formError}</p>
+                )}
                 <button
                   type="submit"
                   disabled={submitting}

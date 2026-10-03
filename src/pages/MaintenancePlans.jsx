@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import usePageTitle from '../hooks/usePageTitle'
+import { postJSON } from '../utils/api'
+import { isValidPhone } from '../utils/validation'
 
 const TIERS = [
   {
@@ -52,6 +55,8 @@ const ADDONS = [
 ]
 
 export default function MaintenancePlans() {
+  usePageTitle('Maintenance Plans', 'Preventative property maintenance memberships with routine checkups, priority scheduling and labor discounts.')
+  const [formError, setFormError] = useState('')
   const [selectedTier, setSelectedTier] = useState(TIERS[1])
   const [selectedAddons, setSelectedAddons] = useState([])
   const [frequency, setFrequency] = useState('monthly') // monthly | annual (15% discount)
@@ -73,32 +78,29 @@ export default function MaintenancePlans() {
 
   const handleSubscribe = async (e) => {
     e.preventDefault()
-    if (!clientInfo.name || !clientInfo.phone || !clientInfo.address) {
-      alert('Please fill out all contact details to activate your plan.')
+    if (!clientInfo.name.trim() || !isValidPhone(clientInfo.phone) || !clientInfo.address.trim()) {
+      setFormError('Please provide your name, a valid phone number and the property address.')
       return
     }
 
     setSubmitting(true)
+    setFormError('')
     try {
-      const formData = new FormData()
-      formData.append('form_type', 'Maintenance Plan Activation')
-      formData.append('tier', selectedTier.name)
-      formData.append('frequency', frequency)
-      formData.append('monthlyPrice', `$${finalPrice} / ${frequency === 'annual' ? 'mo (billed annually)' : 'month'}`)
-      formData.append('addons', selectedAddons.map(a => a.name).join(', ') || 'None')
-      formData.append('name', clientInfo.name)
-      formData.append('phone', clientInfo.phone)
-      formData.append('email', clientInfo.email || '')
-      formData.append('address', clientInfo.address)
-
-      await fetch('send-mail.php', {
-        method: 'POST',
-        body: formData
+      await postJSON('send-mail.php', {
+        name: clientInfo.name,
+        phone: clientInfo.phone,
+        email: clientInfo.email,
+        service: `Maintenance plan: ${selectedTier.name}`,
+        message: [
+          `Plan: ${selectedTier.name} (${frequency})`,
+          `Quoted price: $${finalPrice} / ${frequency === 'annual' ? 'mo, billed annually' : 'month'}`,
+          `Add-ons: ${selectedAddons.map((a) => a.name).join(', ') || 'None'}`,
+          `Property address: ${clientInfo.address}`,
+        ].join('\n'),
       })
       setSubscribed(true)
     } catch (err) {
-      console.error(err)
-      setSubscribed(true)
+      setFormError(err.message)
     } finally {
       setSubmitting(false)
     }
@@ -109,7 +111,7 @@ export default function MaintenancePlans() {
       <div className="wrap">
         <div className="section-head" style={{ textAlign: 'center', maxWidth: '700px', margin: '0 auto 40px' }}>
           <span className="kicker">Property Maintenance Membership</span>
-          <h2>Preventative care, custom-built for your home.</h2>
+          <h1>Preventative care, custom-built for your home.</h1>
           <p>Lock in priority service, routine checkups, and exclusive labor discounts. Pick a core tier and customize your coverage below.</p>
         </div>
 
@@ -284,6 +286,9 @@ export default function MaintenancePlans() {
                   />
                 </div>
 
+                {formError && (
+                  <p role="alert" style={{ color: '#f87171', fontSize: '0.85rem', marginBottom: '12px' }}>{formError}</p>
+                )}
                 <button
                   type="submit"
                   disabled={submitting}

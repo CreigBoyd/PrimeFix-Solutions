@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { isValidEmail } from '../utils/validation'
-
-const API_BASE = import.meta.env.VITE_API_BASE || '/api'
+import { postJSON } from '../utils/api'
 
 export default function Newsletter() {
   const [email, setEmail] = useState('')
@@ -48,21 +47,7 @@ export default function Newsletter() {
     setError('')
 
     try {
-      const res = await fetch(`${API_BASE}/send-mail.php`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email, 
-          company,
-          service: 'Newsletter Subscription',
-          message: 'User subscribed via website newsletter form.'
-        }),
-      })
-      const data = await res.json().catch(() => ({}))
-
-      if (!res.ok || !data.ok) {
-        throw new Error(data.error || 'Something went wrong. Try again in a moment.')
-      }
+      await postJSON('subscribe.php', { email, company })
 
       setStatus('success')
       setEmail('')
@@ -129,7 +114,7 @@ export default function Newsletter() {
           {touched && fieldError && <p className="newsletter-error" id="newsletter-error">{fieldError}</p>}
           {status === 'error' && <p className="newsletter-error">{error}</p>}
           {status !== 'success' && !(touched && fieldError) && (
-            <p className="newsletter-fineprint">No spam. Unsubscribe anytime.</p>
+            <p className="newsletter-fineprint">No spam. Reply to any email to unsubscribe.</p>
           )}
         </div>
       </div>

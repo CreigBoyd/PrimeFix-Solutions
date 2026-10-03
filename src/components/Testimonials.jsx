@@ -7,42 +7,6 @@ const FEATURED = reviews.filter((r) => r.featured)
 export default function Testimonials() {
   return (
     <section id="testimonials" className="band">
-      <style>{`
-        .testi-more {
-          margin-top: 44px;
-          padding-bottom: 12px;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-        .testi-read-all-link {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          color: #ffffff !important;
-          font-size: 1.05rem;
-          font-weight: 600;
-          text-decoration: none;
-          background: transparent !important;
-          border: none !important;
-          padding: 0 !important;
-          box-shadow: none !important;
-          transition: gap 0.2s ease;
-        }
-        .testi-read-all-link:hover {
-          background: transparent !important;
-          color: #ffffff !important;
-          text-decoration: underline;
-          text-underline-offset: 4px;
-          gap: 12px;
-        }
-        .testi-read-all-link svg {
-          transition: transform 0.2s ease;
-        }
-        .testi-read-all-link:hover svg {
-          transform: translateX(4px);
-        }
-      `}</style>
 
       <div className="wrap">
         <div className="section-head center">

@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { isValidEmail, isValidPhone } from '../utils/validation'
-
-const API_BASE = import.meta.env.VITE_API_BASE || '/api'
+import { SITE, telHref, mailHref } from '../config/site'
+import { postJSON } from '../utils/api'
+import { TIME_SLOTS, localDateValue, validateBooking } from '../utils/booking'
 
 const SERVICE_OPTIONS = [
   'Carpentry',
@@ -21,14 +22,6 @@ const INITIAL_FORM = {
   message: '',
   company: '', // honeypot — real visitors never see or fill this in
 }
-
-const TIME_SLOTS = [
-  '9:00 AM – 10:00 AM',
-  '10:30 AM – 11:30 AM',
-  '1:00 PM – 2:00 PM',
-  '2:30 PM – 3:30 PM',
-  '4:00 PM – 5:00 PM',
-]
 
 const FIELD_VALIDATORS = {
   name: (value) => (value.trim() ? '' : 'Please enter your name.'),
@@ -151,22 +144,7 @@ export default function Contact() {
     setError('')
 
     try {
-      const res = await fetch(`${API_BASE}/send-mail.php`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      })
-
-      const contentType = res.headers.get('content-type') || ''
-      if (!contentType.includes('application/json')) {
-        throw new Error('Server configuration error: Response was not valid JSON.')
-      }
-
-      const data = await res.json()
-
-      if (!res.ok || !data.ok) {
-        throw new Error(data.error || 'Something went wrong sending that. Please call or text us instead.')
-      }
+      await postJSON('send-mail.php', form)
 
       setStatus('success')
       setForm(INITIAL_FORM)
@@ -187,17 +165,19 @@ export default function Contact() {
   // Booking handlers
   const handleBookingNext = (e) => {
     e.preventDefault()
-    if (!selectedDate || !selectedSlot) {
-      alert('Please choose a date and time slot.')
+    const problem = validateBooking(selectedDate, selectedSlot)
+    if (problem) {
+      setBookingError(problem)
       return
     }
+    setBookingError('')
     setBookingStep(2)
   }
 
   const handleBookingSubmit = async (e) => {
     e.preventDefault()
-    if (!bookingName || !bookingPhone) {
-      alert('Please provide your name and phone number.')
+    if (!bookingName.trim() || !isValidPhone(bookingPhone)) {
+      setBookingError('Please provide your name and a valid phone number.')
       return
     }
 
@@ -212,27 +192,12 @@ export default function Contact() {
         bookingAddress ? `Property Address: ${bookingAddress}` : null
       ].filter(Boolean).join('\n')
 
-      const res = await fetch(`${API_BASE}/send-mail.php`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: bookingName,
-          phone: bookingPhone,
-          service: `Consultation Slot (${consultType})`,
-          message: messageContent
-        })
+      await postJSON('send-mail.php', {
+        name: bookingName,
+        phone: bookingPhone,
+        service: `Consultation request (${consultType})`,
+        message: messageContent,
       })
-
-      const contentType = res.headers.get('content-type') || ''
-      if (!contentType.includes('application/json')) {
-        throw new Error('Server configuration error: Backend returned non-JSON response.')
-      }
-
-      const data = await res.json()
-
-      if (!res.ok || !data.ok) {
-        throw new Error(data.error || 'Failed to schedule appointment. Please contact us directly.')
-      }
 
       setBookingSubmitted(true)
     } catch (err) {
@@ -255,9 +220,7 @@ export default function Contact() {
   }
 
   // Tomorrow date for min selector
-  const tomorrow = new Date()
-  tomorrow.setDate(tomorrow.getDate() + 1)
-  const minDateStr = tomorrow.toISOString().split('T')[0]
+  const minDateStr = localDateValue(1)
 
   return (
     <section id="contact">
@@ -275,14 +238,14 @@ export default function Contact() {
               <svg className="icon" viewBox="0 0 24 24" fill="none">
                 <path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3 19.5 19.5 0 01-6-6 19.8 19.8 0 01-3-8.7A2 2 0 014.1 2h3a2 2 0 012 1.7c.1.9.3 1.8.6 2.7a2 2 0 01-.4 2.1L8 9.9a16 16 0 006 6l1.4-1.4a2 2 0 012.1-.4c.9.3 1.8.5 2.7.6a2 2 0 011.7 2.1z" stroke="currentColor" strokeWidth="1.5" />
               </svg>
-              <div><span className="label">Call or text</span><a href="tel:5550102000">(555) 010-2000</a></div>
+              <div><span className="label">Call or text</span><a href={telHref}>{SITE.phoneDisplay}</a></div>
             </div>
             <div className="contact-row">
               <svg className="icon" viewBox="0 0 24 24" fill="none">
                 <path d="M4 4h16v16H4z" stroke="currentColor" strokeWidth="1.5" />
                 <path d="M4 6l8 7 8-7" stroke="currentColor" strokeWidth="1.5" />
               </svg>
-              <div><span className="label">Email</span><a href="mailto:hello@primefixsolutions.com">hello@primefixsolutions.com</a></div>
+              <div><span className="label">Email</span><a href={mailHref}>{SITE.email}</a></div>
             </div>
             <div className="contact-row">
               <svg className="icon" viewBox="0 0 24 24" fill="none">
@@ -504,34 +467,6 @@ export default function Contact() {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           zIndex: 2000, padding: '16px'
         }} onClick={resetBookingModal}>
-          <style>{`
-            .booking-modal-card {
-              background: var(--bg-card, #132231);
-              border: 1px solid var(--border, #20364d);
-              border-radius: 16px;
-              width: 100%;
-              max-width: 520px;
-              padding: 32px;
-              box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-              position: relative;
-              color: var(--text, #fff);
-              animation: modalScaleIn 0.25s ease forwards;
-            }
-            @keyframes modalScaleIn {
-              from { opacity: 0; transform: scale(0.95); }
-              to { opacity: 1; transform: scale(1); }
-            }
-            .type-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-            .type-option { padding: 12px; background: var(--bg, #0a131c); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-weight: 600; font-size: 0.88rem; cursor: pointer; text-align: center; transition: all 0.2s; }
-            .type-option.active { border-color: var(--teal, #128077); background: rgba(18, 128, 119, 0.15); color: var(--teal-bright, #2dd4bf); }
-            .booking-form-group { margin-bottom: 16px; }
-            .booking-form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
-            .booking-input { width: 100%; padding: 12px; background: var(--bg, #0a131c); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.95rem; outline: none; }
-            .booking-input:focus { border-color: var(--teal, #128077); }
-            .slots-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 20px; }
-            .slot-btn { padding: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text-soft); font-size: 0.82rem; cursor: pointer; text-align: center; transition: all 0.15s; }
-            .slot-btn.selected { background: var(--teal); color: #fff; border-color: var(--teal); font-weight: 600; }
-          `}</style>
 
           <div className="booking-modal-card" onClick={(e) => e.stopPropagation()}>
             <button 
@@ -583,18 +518,22 @@ export default function Contact() {
                     <div className="booking-form-group">
                       <label>Select 1-Hour Time Window</label>
                       <div className="slots-grid">
-                        {TIME_SLOTS.map((slot) => (
+                        {TIME_SLOTS.map(({ label }) => (
                           <button
                             type="button"
-                            key={slot}
-                            className={`slot-btn ${selectedSlot === slot ? 'selected' : ''}`}
-                            onClick={() => setSelectedSlot(slot)}
+                            key={label}
+                            className={`slot-btn ${selectedSlot === label ? 'selected' : ''}`}
+                            onClick={() => setSelectedSlot(label)}
                           >
-                            {slot}
+                            {label}
                           </button>
                         ))}
                       </div>
                     </div>
+
+                    {bookingError && (
+                      <p role="alert" style={{ color: '#f87171', fontSize: '0.85rem', marginBottom: '12px' }}>{bookingError}</p>
+                    )}
 
                     <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '14px', fontWeight: 700, cursor: 'pointer' }}>
                       Continue to Details
@@ -666,9 +605,9 @@ export default function Contact() {
               </div>
             ) : (
               <div style={{ textAlign: 'center', padding: '24px 0' }}>
-                <h4 style={{ fontSize: '1.5rem', color: 'var(--teal-bright, #2dd4bf)', marginBottom: '12px' }}>You're Booked! 🎉</h4>
+                <h4 style={{ fontSize: '1.5rem', color: 'var(--teal-bright, #2dd4bf)', marginBottom: '12px' }}>Request Received! 🎉</h4>
                 <p style={{ fontSize: '0.95rem', color: 'var(--text-soft)', lineHeight: 1.5, marginBottom: '24px' }}>
-                  We've reserved your slot for <strong>{selectedDate}</strong> between <strong>{selectedSlot}</strong>. We'll send a confirmation call or message to <strong>{bookingPhone}</strong> shortly.
+                  We've received your request for <strong>{selectedDate}</strong> between <strong>{selectedSlot}</strong>. We'll call or text <strong>{bookingPhone}</strong> to confirm your appointment.
                 </p>
                 <button type="button" onClick={resetBookingModal} className="btn btn-primary" style={{ width: '100%', padding: '12px', cursor: 'pointer' }}>
                   Done

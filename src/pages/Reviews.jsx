@@ -29,27 +29,6 @@ export default function Reviews() {
 
   return (
     <>
-      <style>{`
-        .rev-top-nav-bar {
-          display: flex;
-          justify-content: flex-start;
-          align-items: center;
-          margin-bottom: 20px;
-        }
-        .rev-home-link {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          color: var(--text-soft, #94a3b8);
-          text-decoration: none;
-          font-size: 0.9rem;
-          font-weight: 600;
-          transition: color 0.2s;
-        }
-        .rev-home-link:hover {
-          color: var(--teal, #128077);
-        }
-      `}</style>
 
       <section className="reviews-page">
         <div className="wrap">
@@ -65,7 +44,7 @@ export default function Reviews() {
 
           <div className="section-head center">
             <span className="kicker">Reviews</span>
-            <h2>What customers say.</h2>
+            <h1>What customers say.</h1>
             <p>Real feedback from real jobs — the good, and the occasional four-star.</p>
           </div>
 

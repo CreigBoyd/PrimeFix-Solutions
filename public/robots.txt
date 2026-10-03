@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /api/
 
-Sitemap: https://primefixsolutions.com/sitemap.xml
+Sitemap: https://primefix.vip/sitemap.xml

@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import StarRating from './StarRating'
-
-const API_BASE = import.meta.env.VITE_API_BASE || '/api'
+import { postJSON } from '../utils/api'
 
 const SERVICE_OPTIONS = [
   'Carpentry',
@@ -46,21 +45,54 @@ export default function ReviewModal({ isOpen, onClose }) {
     }, 480)
   }
 
+  // Always call the latest triggerClose from the keydown handler without re-subscribing.
+  const closeRef = useRef(triggerClose)
+  closeRef.current = triggerClose
+  const cardRef = useRef(null)
+  const returnFocusRef = useRef(null)
+
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && isOpen && !isExiting) triggerClose()
-    }
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-      window.addEventListener('keydown', handleKeyDown)
-    } else {
+    if (!isOpen) {
       document.body.style.overflow = ''
+      return undefined
     }
+
+    returnFocusRef.current = document.activeElement
+    document.body.style.overflow = 'hidden'
+
+    // Move focus into the dialog.
+    const focusables = () =>
+      cardRef.current
+        ? [...cardRef.current.querySelectorAll('button, [href], input:not(.hp-field), select, textarea, [tabindex]:not([tabindex="-1"])')].filter((el) => !el.disabled)
+        : []
+    focusables()[0]?.focus()
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        closeRef.current()
+        return
+      }
+      if (e.key !== 'Tab') return
+      const items = focusables()
+      if (!items.length) return
+      const first = items[0]
+      const last = items[items.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
     return () => {
       document.body.style.overflow = ''
       window.removeEventListener('keydown', handleKeyDown)
+      returnFocusRef.current?.focus?.()
     }
-  }, [isOpen, isExiting])
+  }, [isOpen])
 
   if (!isOpen && !isExiting) return null
 
@@ -114,16 +146,7 @@ export default function ReviewModal({ isOpen, onClose }) {
     setError('')
 
     try {
-      const res = await fetch(`${API_BASE}/submit-review.php`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      })
-      const data = await res.json().catch(() => ({}))
-
-      if (!res.ok || !data.ok) {
-        throw new Error(data.error || 'Something went wrong submitting that. Please try again.')
-      }
+      await postJSON('submit-review.php', form)
 
       setStatus('success')
     } catch (err) {
@@ -144,66 +167,6 @@ export default function ReviewModal({ isOpen, onClose }) {
 
   return (
     <>
-      <style>{`
-        @keyframes reviewModalFadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes reviewModalFadeOut { from { opacity: 1; } to { opacity: 0; } }
-        @keyframes reviewModalSwingIn {
-          0% { transform: perspective(1200px) rotateY(-24deg) rotateX(14deg) translateZ(-100px) scale(0.85); opacity: 0; }
-          100% { transform: perspective(1200px) rotateY(0deg) rotateX(0deg) translateZ(0) scale(1); opacity: 1; }
-        }
-        @keyframes reviewModalSlideOut {
-          0% { transform: perspective(1200px) translateY(0) rotate(0deg) scale(1); opacity: 1; }
-          100% { transform: perspective(1200px) translateY(80vh) rotate(6deg) scale(0.92); opacity: 0; }
-        }
-
-        .review-modal-overlay {
-          position: fixed; inset: 0;
-          background: rgba(14, 42, 56, 0.78);
-          backdrop-filter: blur(8px);
-          z-index: 9999;
-          display: flex; justify-content: center; align-items: center;
-          padding: 20px;
-          perspective: 1400px;
-        }
-        .review-modal-overlay.open { animation: reviewModalFadeIn 0.4s ease forwards; }
-        .review-modal-overlay.exiting { animation: reviewModalFadeOut 0.45s ease forwards; pointer-events: none; }
-
-        .review-modal-card {
-          width: 100%; max-width: 520px;
-          max-height: 88vh;
-          overflow-y: auto;
-          background: var(--bg-card, #fff);
-          border: 1px solid var(--border, rgba(14,42,56,0.1));
-          border-radius: 14px;
-          padding: 32px;
-          position: relative;
-          box-shadow: 0 30px 60px rgba(0,0,0,0.35);
-        }
-        .review-modal-overlay.open .review-modal-card { animation: reviewModalSwingIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards; }
-        .review-modal-overlay.exiting .review-modal-card { animation: reviewModalSlideOut 0.45s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards; }
-
-        .review-modal-close {
-          position: absolute; top: 14px; right: 14px;
-          background: var(--bg, rgba(0,0,0,0.05));
-          border: none; color: var(--text-soft, #4A6572);
-          cursor: pointer; width: 32px; height: 32px;
-          display: flex; align-items: center; justify-content: center;
-          border-radius: 50%; transition: all 0.2s ease;
-        }
-        .review-modal-close:hover { color: var(--text, #0E2A38); background: rgba(0,0,0,0.1); transform: scale(1.08); }
-
-        .review-modal-card h3 { margin: 0 0 4px; color: var(--text, #0E2A38); font-family: 'Newsreader', serif; font-size: 1.5rem; font-weight: 600; }
-        .review-modal-card p.review-modal-sub { margin: 0 0 22px; color: var(--text-soft, #4A6572); font-size: 0.92rem; }
-
-        .review-modal-form { display: flex; flex-direction: column; gap: 16px; }
-
-        .review-modal-success {
-          display: flex; flex-direction: column; align-items: center; text-align: center;
-          gap: 10px; padding: 20px 8px 6px;
-        }
-        .review-modal-success svg { width: 40px; height: 40px; color: var(--teal-bright, #17998D); }
-        .review-modal-success h3 { font-size: 1.3rem; }
-      `}</style>
 
       <div
         className={`review-modal-overlay ${isOpen && !isExiting ? 'open' : ''} ${isExiting ? 'exiting' : ''}`}
@@ -212,7 +175,7 @@ export default function ReviewModal({ isOpen, onClose }) {
         aria-modal="true"
         aria-labelledby="review-modal-title"
       >
-        <div className="review-modal-card" onClick={(e) => e.stopPropagation()}>
+        <div className="review-modal-card" ref={cardRef} onClick={(e) => e.stopPropagation()}>
           <button className="review-modal-close" onClick={triggerClose} aria-label="Close">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <line x1="18" y1="6" x2="6" y2="18" />

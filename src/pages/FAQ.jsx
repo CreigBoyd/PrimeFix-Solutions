@@ -2,6 +2,7 @@ import React from 'react';
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import usePageTitle from '../hooks/usePageTitle';
+import { SITE, telHref } from '../config/site'
 
 const CATEGORIES = [
   {
@@ -198,7 +199,7 @@ const FAQS = [
 export default function FAQ() {
 
 // Sets the browser tab title to "Customer Reviews | PrimeFix Solutions"
-  usePageTitle('FAQS');
+  usePageTitle('FAQ', 'Answers about estimates, scheduling, licensing, pricing and how we work.');
 
   const navigate = useNavigate()
   const [activeCategory, setActiveCategory] = useState('all')
@@ -307,7 +308,7 @@ export default function FAQ() {
           {grouped.length === 0 ? (
             <div className="faq-empty">
               <p>No questions match "{searchTerm}". Try a different search, or just ask us directly.</p>
-              <a href="tel:5550102000" className="btn btn-outline">Call (555) 010-2000</a>
+              <a href={telHref} className="btn btn-outline">Call {SITE.phoneDisplay}</a>
             </div>
           ) : (
             grouped.map((cat) => (
@@ -356,7 +357,7 @@ export default function FAQ() {
             <p>We're happy to talk it through — no pressure, no sales pitch.</p>
           </div>
           <div className="faq-cta-actions">
-            <a href="tel:5550102000" className="btn btn-outline">Call (555) 010-2000</a>
+            <a href={telHref} className="btn btn-outline">Call {SITE.phoneDisplay}</a>
             <a href="#contact" className="btn btn-primary" onClick={handleEstimateClick}>Get a free estimate</a>
           </div>
         </div>
