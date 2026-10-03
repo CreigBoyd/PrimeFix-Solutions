@@ -451,8 +451,14 @@ nav.primary a.nav-link.active::after {
 }
 
 .hero h1 em {
-  font-style: italic;
-  background: linear-gradient(100deg, var(--teal-deep), var(--green));
+  display: inline-block;
+  font-family: 'Playwrite IS', cursive;
+  font-style: normal;
+  font-weight: 300;
+  font-size: 0.8em;
+  line-height: 1.5;
+  padding: 0 0.1em 0.12em 0;
+  background: linear-gradient(100deg, var(--teal-bright), #8fe3c8);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -1045,71 +1051,108 @@ textarea {
   .newsletter-form-wrap { flex: 0 0 auto; width: 100%; max-width: none; }
 }
 
+/* ---------- Cursive accent (self-hosted Playwrite IS, SIL Open Font License) ---------- */
+@font-face {
+  font-family: 'Playwrite IS';
+  src: url('./assets/fonts/playwrite-is-latin.woff2') format('woff2');
+  font-weight: 100 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+.cursive {
+  position: relative;
+  font-family: 'Playwrite IS', cursive;
+}
+
 /* ---------- Footer ---------- */
 footer.site {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, #08171d 0%, #060f14 100%);
   border-top: 1px solid var(--border);
-  padding: 50px 0 calc(38px + env(safe-area-inset-bottom, 0px));
+  padding: 68px 0 calc(28px + env(safe-area-inset-bottom, 0px));
+}
+
+/* teal accent line along the top edge + soft glow */
+footer.site::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--teal-bright) 30%, var(--green) 70%, transparent);
+}
+
+footer.site::after {
+  content: '';
+  position: absolute;
+  top: -280px;
+  right: -180px;
+  width: 560px;
+  height: 560px;
+  background: radial-gradient(closest-side, rgba(23, 153, 141, 0.13), transparent);
+  pointer-events: none;
 }
 
 .footer-top {
-  display: flex;
-  justify-content: space-between;
-  gap: 40px;
-  flex-wrap: wrap;
-  padding-bottom: 34px;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1.2fr;
+  gap: 48px;
+  padding-bottom: 46px;
   border-bottom: 1px solid var(--border);
-  margin-bottom: 24px;
+  margin-bottom: 26px;
 }
 
-/* Brand & Social Section */
-.footer-brand {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  max-width: 340px;
-  flex: 1 1 280px;
-}
-
+/* Brand block */
 .footer-brand-link {
   display: inline-flex;
   align-items: center;
   gap: 12px;
+  color: var(--text);
   text-decoration: none;
-  color: inherit;
-  transition: opacity 0.2s ease;
-}
-
-.footer-brand-link:hover {
-  opacity: 0.9;
 }
 
 .footer-brand img.primefix-footer-logo {
   width: 42px;
   height: 42px;
-  display: block;
-  flex: none;
   object-fit: contain;
 }
 
 .footer-brand strong {
   font-family: 'Public Sans', sans-serif;
-  font-weight: 800;
   font-size: 1.1rem;
+  font-weight: 700;
   letter-spacing: -0.01em;
 }
 
-.footer-brand p {
-  font-size: 0.88rem;
-  line-height: 1.55;
-  color: var(--text-soft);
+.footer-signature {
+  margin: 22px 0 10px;
+  padding-bottom: 6px;
+  font-size: 1.45rem;
+  font-weight: 300;
+  line-height: 1.5;
+  background: linear-gradient(100deg, var(--teal-bright), #8fe3c8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.footer-blurb {
   margin: 0;
+  max-width: 36ch;
+  color: var(--text-soft);
+  font-size: 0.92rem;
+  line-height: 1.7;
 }
 
 .footer-social {
   display: flex;
-  align-items: center;
   gap: 10px;
-  margin-top: 4px;
+  margin-top: 22px;
 }
 
 .footer-social a {
@@ -1118,133 +1161,145 @@ footer.site {
   justify-content: center;
   width: 38px;
   height: 38px;
-  border-radius: 8px;
-  background: var(--bg-card);
+  border-radius: 50%;
   border: 1px solid var(--border);
   color: var(--text-soft);
-  font-size: 0.95rem;
-  text-decoration: none;
-  transition: all 0.2s ease-in-out;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
 }
 
 .footer-social a:hover {
   color: #fff;
-  background: var(--teal);
   border-color: var(--teal-bright);
+  background: rgba(23, 153, 141, 0.18);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* Footer Links Columns */
-.footer-links {
-  display: flex;
-  gap: 60px;
-  flex-wrap: wrap;
-  flex: 2 1 300px;
-  justify-content: flex-end;
-}
-
-.footer-links > div {
-  min-width: 140px;
-}
-
-.footer-links h5 {
-  font-size: 0.82rem;
-  color: var(--text-soft);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin: 0 0 16px 0;
+/* Link columns */
+.footer-col h5 {
+  margin: 0 0 18px;
+  font-family: 'Public Sans', sans-serif;
+  font-size: 0.74rem;
   font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text);
 }
 
-.footer-links ul {
+.footer-col ul {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 11px;
 }
 
-.footer-links a,
-.footer-links span {
-  font-size: 0.88rem;
+.footer-col a,
+.footer-col li > span {
   color: var(--text-soft);
+  font-size: 0.92rem;
+  line-height: 1.45;
   text-decoration: none;
-  transition: color 0.2s ease;
-  line-height: 1.4;
+  transition: color 0.15s ease;
 }
 
-.footer-links a:hover {
+.footer-col ul a:hover {
   color: var(--teal-bright);
 }
 
-/* Footer Bottom Bar */
+/* Contact column */
+.footer-contact li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.footer-ico {
+  flex: 0 0 auto;
+  width: 14px;
+  margin-top: 4px;
+  color: var(--teal-bright);
+}
+
+.footer-contact a { overflow-wrap: anywhere; }
+
+.footer-contact .footer-cta {
+  margin-top: 22px;
+  color: #fff;
+}
+
+/* Bottom bar */
 .footer-bottom {
+  position: relative;
+  z-index: 1;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 14px 24px;
   flex-wrap: wrap;
-  gap: 14px;
   font-size: 0.82rem;
   color: var(--text-soft);
 }
 
-.footer-bottom span:last-child {
-  font-weight: 600;
+.footer-top-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-soft);
+  font: inherit;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
 }
 
-/* Responsive Overrides */
-@media (max-width: 768px) {
-  footer.site { padding-top: 44px; }
-
-  .footer-links {
-    justify-content: flex-start;
-    gap: 40px;
-  }
+.footer-top-btn:hover {
+  color: var(--teal-bright);
+  border-color: var(--teal-bright);
 }
 
-@media (max-width: 640px) {
+/* Responsive */
+@media (max-width: 1024px) {
   .footer-top {
-    flex-direction: column;
-    gap: 30px;
-    padding-bottom: 26px;
-    margin-bottom: 20px;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 40px 32px;
   }
+  .footer-brand { grid-column: 1 / -1; }
+  .footer-blurb { max-width: 52ch; }
+  .footer-contact { grid-column: auto; }
+}
 
-  /* Desktop flex-basis values (280px / 300px) turn into forced HEIGHTS in a column. */
-  .footer-brand,
-  .footer-links {
-    flex: 0 0 auto;
-    width: 100%;
-    max-width: none;
-  }
+@media (max-width: 720px) {
+  footer.site { padding-top: 48px; }
 
-  .footer-brand p { max-width: 38ch; }
-
-  /* Two tidy columns instead of a stretched stack */
-  .footer-links {
-    display: grid;
+  .footer-top {
     grid-template-columns: 1fr 1fr;
-    gap: 28px 24px;
+    gap: 34px 20px;
+    padding-bottom: 32px;
   }
 
-  .footer-links > div { min-width: 0; }
-  .footer-links h5 { margin-bottom: 6px; }
-  .footer-links ul { gap: 0; }
+  .footer-contact { grid-column: 1 / -1; }
 
-  /* Comfortable tap targets */
-  .footer-links a,
-  .footer-links span {
-    display: block;
-    padding: 8px 0;
-    overflow-wrap: anywhere;
+  .footer-signature { font-size: 1.3rem; margin-top: 18px; }
+
+  /* comfortable tap targets */
+  .footer-col ul { gap: 0; }
+  .footer-col ul a,
+  .footer-col li > span { display: inline-block; padding: 8px 0; }
+  .footer-contact li { align-items: center; }
+  .footer-ico { margin-top: 0; }
+
+  .footer-contact .footer-cta {
+    width: 100%;
+    margin-top: 18px;
+    padding: 14px 22px;
   }
 
   .footer-bottom {
     flex-direction: column;
     align-items: flex-start;
-    gap: 6px;
     font-size: 0.78rem;
     line-height: 1.5;
   }
@@ -3797,3 +3852,32 @@ footer.site {
   .emergency-banner-bar a { white-space: nowrap; margin-left: 2px; }
   .emergency-close-btn { right: 6px; top: 50%; transform: translateY(-50%); }
 }
+
+
+/* ===== Hero image (portrait photo): never stretch, never push the headline below the fold ===== */
+.hero-image-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.hero-image-wrap img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 960 / 1274;
+  object-fit: cover;
+  max-width: clamp(300px, calc((100svh - 230px) * 0.753), 500px);
+  border-radius: 18px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+@media (max-width: 900px) {
+  .hero-image-wrap img { max-width: min(100%, 420px); }
+}
+
+/* Keep the extended tap area inside the screen (the banner close button sits 6px from the edge) */
+.emergency-close-btn::after { inset: -12px -6px -12px -12px; }
+
+/* Safety net: decorative glows/blobs must never create sideways scrolling.
+   `clip` (unlike `hidden`) doesn't create a scroll container, so sticky headers keep working. */
+html, body { overflow-x: clip; }

@@ -29,8 +29,8 @@ export default function Hero() {
           <img
             src={heroImg}
             alt="PrimeFix Solutions building maintenance technician"
-            width="800"
-            height="450"
+            width="960"
+            height="1274"
             loading="eager"
             fetchPriority="high"
             decoding="async"

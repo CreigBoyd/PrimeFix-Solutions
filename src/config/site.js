@@ -7,6 +7,7 @@ export const SITE = {
   phoneDisplay: '(555) 010-2000',
   phoneTel: '+15550102000',
   email: 'hello@primefix.vip',
+  hours: 'Mon–Sat, 7am–6pm',
   // Paste your REAL profile URLs here (e.g. 'https://www.facebook.com/yourpage').
   // Anything left empty is simply not shown in the footer.
   social: {

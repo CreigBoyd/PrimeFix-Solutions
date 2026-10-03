@@ -26,7 +26,7 @@ export default defineConfig({
       },
       workbox: {
         // Precache only the app shell. Photos are large, so they're cached on first use instead.
-        globPatterns: ['**/*.{js,css,html,ico,svg}', 'android-chrome-*.png', 'apple-touch-icon.png', 'favicon-*.png'],
+        globPatterns: ['**/*.{js,css,html,ico,svg,woff2}', 'android-chrome-*.png', 'apple-touch-icon.png', 'favicon-*.png'],
         // Don't let the SPA fallback swallow the API or plain static files.
         navigateFallbackDenylist: [/^\/api\//, /\.(?:xml|txt|vcf)$/],
         runtimeCaching: [
