@@ -2,9 +2,7 @@ BEGIN:VCARD
 VERSION:3.0
 FN:PrimeFix Solutions
 ORG:PrimeFix Solutions
-TITLE:Building & Property Maintenance
-TEL;TYPE=WORK,VOICE:(555) 010-2000
-EMAIL;TYPE=WORK:hello@primefix.vip
+TEL;TYPE=WORK,VOICE:(978) 417-2042
+EMAIL;TYPE=WORK:hello@PrimeFix.vip
 URL:https://primefix.vip
-NOTE:Professional Building and Property Maintenance Services.
 END:VCARD

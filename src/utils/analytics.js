@@ -1,5 +1,5 @@
 // Google Analytics loads ONLY after the visitor accepts cookies.
-const GA_ID = 'G-GD8QD81L85'
+const GA_ID = 'G-6SPRRMQXJZ'
 const KEY = 'pfs-cookie-consent' // 'granted' | 'denied'
 let loaded = false
 

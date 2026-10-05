@@ -1,38 +1,6 @@
 import { useState, useRef } from 'react'
-import cabinetOld from '../assets/slider-images/Cabinet-Old.webp'
-import cabinetNew from '../assets/slider-images/Cabinet-New.webp'
-import deckOld from '../assets/slider-images/Deck-Old.webp'
-import deckNew from '../assets/slider-images/Deck-New.webp'
-import roofOld from '../assets/slider-images/Roof-Old.webp'
-import roofNew from '../assets/slider-images/Roof-New.webp'
 import usePageTitle from '../hooks/usePageTitle'
-
-const PROJECTS = [
-  {
-    id: 1,
-    title: 'Full Exterior Deck Rebuild & Railing Upgrade',
-    category: 'Carpentry',
-    desc: 'Replaced a severely weathered, rotting 20-year-old pine deck with low-maintenance composite decking and custom black aluminum railing.',
-    beforeImg: deckOld,
-    afterImg: deckNew,
-  },
-  {
-    id: 2,
-    title: 'Architectural Shingle Roof Replacement',
-    category: 'Roofing',
-    desc: 'Stripped away old shingles, repaired plywood roof decking, and installed heavy-duty architectural dimensional shingles with upgraded ridge vents.',
-    beforeImg: roofOld,
-    afterImg: roofNew,
-  },
-  {
-    id: 3,
-    title: 'Complete Kitchen & Interior Cabinet Refinishing',
-    category: 'Painting & Finishing',
-    desc: 'Sprayed dated oak cabinets with a clean modern satin finish, added new matte black hardware, and updated wall trim.',
-    beforeImg: cabinetOld,
-    afterImg: cabinetNew,
-  },
-]
+import { TRANSFORMATIONS as PROJECTS } from '../data/projects'
 
 function ComparisonSlider({ beforeImg, afterImg, title }) {
   const [sliderPosition, setSliderPosition] = useState(50)

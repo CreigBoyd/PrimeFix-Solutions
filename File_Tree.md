@@ -2,38 +2,54 @@
 
 ```
 primefix-react/
-├── .continue/
-│   └── agents/
-│       └── new-config.yaml
 ├── dist/
 │   ├── assets/
-│   │   ├── BeforeAfterPortfolio-Bf4auFbX.js
-│   │   ├── Cabinet-New-aeH4u9TT.webp
-│   │   ├── Cabinet-Old-CzmZk44K.webp
-│   │   ├── CostEstimator-C5tykv7O.js
-│   │   ├── Deck-New-C7HzPwcK.webp
-│   │   ├── Deck-Old-C1fUZd5e.webp
-│   │   ├── FAQ-BtYxnkWv.js
-│   │   ├── fontawesome-vendor-BLf0FzRu.js
-│   │   ├── Home-Cqq818Ml.js
-│   │   ├── index-CjTdYYio.css
-│   │   ├── index-CuUWE3Te.js
-│   │   ├── MaintenancePlans-DnL-JpVl.js
-│   │   ├── NotFound-6KluABl0.js
-│   │   ├── portfolio-deck-S7ZtShBM.webp
-│   │   ├── portfolio-painting-CZPrMqtQ.webp
-│   │   ├── portfolio-roof-3aA22JnF.webp
-│   │   ├── portfolio-yard-Diz4t20j.webp
-│   │   ├── primefix-hero-W4NJ4_Ki.webp
+│   │   ├── BeforeAfterPortfolio-DLg5f9Kn.js
+│   │   ├── Cabinet-New-NbmysBww.webp
+│   │   ├── Cabinet-Old-DQnYyKt9.webp
+│   │   ├── CostEstimator-C6lYE_kr.js
+│   │   ├── Deck-New-C75vjCWc.webp
+│   │   ├── Deck-Old-nstCy29z.webp
+│   │   ├── FAQ-CASOYVsM.js
+│   │   ├── fontawesome-vendor-CDbQH0Mf.js
+│   │   ├── hero-poster-BdRJhdNt.jpg
+│   │   ├── Home-RqTPZHx9.js
+│   │   ├── index-BLaqqR4U.js
+│   │   ├── index-hGlygdDg.css
+│   │   ├── MaintenancePlans-qLnpy_IB.js
+│   │   ├── newsreader-latin-400-italic-CEihAR-f.woff2
+│   │   ├── newsreader-latin-400-normal-BFBkh4jY.woff2
+│   │   ├── newsreader-latin-500-italic-Bsgye1qA.woff2
+│   │   ├── newsreader-latin-500-normal-B66TYsaK.woff2
+│   │   ├── newsreader-latin-600-normal-30OJ_TG_.woff2
+│   │   ├── NotFound-Cihs5pM9.js
+│   │   ├── playwrite-is-latin-Bm3XSvfa.woff2
+│   │   ├── portfolio-deck-DkFmCAkX.webp
+│   │   ├── portfolio-painting-CMSr9Mxy.webp
+│   │   ├── portfolio-roof-D5LyZ9EH.webp
+│   │   ├── portfolio-yard-BelC4OeO.webp
+│   │   ├── primefix-hero-fPmrBphe.webp
 │   │   ├── primefix-solutions-logo-dark-bg-CF7MSGSC.svg
+│   │   ├── Privacy-CoIfv5Za.js
+│   │   ├── projects-D2rz98Mf.js
+│   │   ├── public-sans-latin-400-normal-8Rpg0ruU.woff2
+│   │   ├── public-sans-latin-500-normal-NlrCPXnF.woff2
+│   │   ├── public-sans-latin-600-normal-Fru-LXNs.woff2
+│   │   ├── public-sans-latin-700-normal-BqJmxWdE.woff2
+│   │   ├── public-sans-latin-800-normal-Cymo4W0O.woff2
 │   │   ├── react-vendor-DkfLzY1l.js
-│   │   ├── Reviews-CxhaUuDw.js
-│   │   ├── reviews-Dl9z_ZXl.js
-│   │   ├── Roof-New-B4U-p9EX.webp
-│   │   ├── Roof-Old-8uxfNoWy.jpg
-│   │   ├── ServiceExplorer-CvsFIu81.js
-│   │   ├── toast-DCGVZOYj.js
-│   │   └── usePageTitle-iHaGpHt1.js
+│   │   ├── Reviews-d_gyOicF.js
+│   │   ├── reviews-nOa7ztcq.js
+│   │   ├── roboto-latin-400-normal-BqEyEoaF.woff2
+│   │   ├── roboto-latin-500-normal-7RbcRiD8.woff2
+│   │   ├── Roof-New-B7lCQLef.webp
+│   │   ├── Roof-Old-DNea-i-p.webp
+│   │   ├── ServiceExplorer-CNLV0Uxe.js
+│   │   ├── Terms-DHoXA1Xj.js
+│   │   ├── toast-BN2GLDgK.js
+│   │   └── usePageTitle-ojHBpmYC.js
+│   ├── videos/
+│   │   └── bhero.mp4
 │   ├── .htaccess
 │   ├── about.txt
 │   ├── android-chrome-192x192.png
@@ -44,14 +60,17 @@ primefix-react/
 │   ├── favicon.ico
 │   ├── index.html
 │   ├── manifest.webmanifest
+│   ├── og-image.jpg
 │   ├── primefix-solutions.vcf
 │   ├── registerSW.js
 │   ├── robots.txt
 │   ├── site.webmanifest
 │   ├── sitemap.xml
 │   ├── sw.js
-│   └── workbox-9c191d2f.js
+│   └── workbox-835c8c05.js
 ├── public/
+│   ├── videos/
+│   │   └── bhero.mp4
 │   ├── .htaccess
 │   ├── about.txt
 │   ├── android-chrome-192x192.png
@@ -84,14 +103,33 @@ primefix-react/
 │   └── subscribers.csv
 ├── src/
 │   ├── assets/
+│   │   ├── fonts/
+│   │   │   ├── newsreader-latin-400-italic.woff2
+│   │   │   ├── newsreader-latin-400-normal.woff2
+│   │   │   ├── newsreader-latin-500-italic.woff2
+│   │   │   ├── newsreader-latin-500-normal.woff2
+│   │   │   ├── newsreader-latin-600-normal.woff2
+│   │   │   ├── Newsreader-OFL-LICENSE.txt
+│   │   │   ├── playwrite-is-latin.woff2
+│   │   │   ├── Playwrite-OFL-LICENSE.txt
+│   │   │   ├── public-sans-latin-400-normal.woff2
+│   │   │   ├── public-sans-latin-500-normal.woff2
+│   │   │   ├── public-sans-latin-600-normal.woff2
+│   │   │   ├── public-sans-latin-700-normal.woff2
+│   │   │   ├── public-sans-latin-800-normal.woff2
+│   │   │   ├── PublicSans-OFL-LICENSE.txt
+│   │   │   ├── roboto-latin-400-normal.woff2
+│   │   │   ├── roboto-latin-500-normal.woff2
+│   │   │   └── Roboto-LICENSE.txt
 │   │   ├── slider-images/
 │   │   │   ├── Cabinet-New.webp
 │   │   │   ├── Cabinet-Old.webp
 │   │   │   ├── Deck-New.webp
 │   │   │   ├── Deck-Old.webp
 │   │   │   ├── Roof-New.webp
-│   │   │   ├── Roof-Old.jpg
 │   │   │   └── Roof-Old.webp
+│   │   ├── hero-poster.jpg
+│   │   ├── logo.jpg
 │   │   ├── portfolio-deck.webp
 │   │   ├── portfolio-painting.webp
 │   │   ├── portfolio-roof.webp
@@ -127,6 +165,7 @@ primefix-react/
 │   ├── config/
 │   │   └── site.js
 │   ├── data/
+│   │   ├── projects.js
 │   │   └── reviews.json
 │   ├── hooks/
 │   │   └── usePageTitle.js
@@ -137,8 +176,10 @@ primefix-react/
 │   │   ├── Home.jsx
 │   │   ├── MaintenancePlans.jsx
 │   │   ├── NotFound.jsx
+│   │   ├── Privacy.jsx
 │   │   ├── Reviews.jsx
-│   │   └── ServiceExplorer.jsx
+│   │   ├── ServiceExplorer.jsx
+│   │   └── Terms.jsx
 │   ├── routes/
 │   │   └── pageRegistry.js
 │   ├── utils/
@@ -150,17 +191,17 @@ primefix-react/
 │   │   └── validation.js
 │   ├── App.jsx
 │   ├── main.jsx
-│   ├── OrininalCSS_style.css
 │   └── style.css
 ├── .env
+├── build_zip-for-namecheap.bat
+├── build.bat
 ├── FS.cjs
+├── git_push.bat
 ├── index.html
 ├── package-lock.json
 ├── package.json
-├── PFS.zip
 ├── README.md
 ├── start.bat
 ├── transfer.cjs
-├── vercel.json
 └── vite.config.js
 ```

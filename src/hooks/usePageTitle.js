@@ -1,4 +1,7 @@
 import { useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
+
+const ORIGIN = 'https://primefix.vip'
 
 export const DEFAULT_TITLE = 'Prime Fix Solutions | Professional Handyman & Home Maintenance'
 export const DEFAULT_DESCRIPTION =
@@ -9,6 +12,8 @@ export const DEFAULT_DESCRIPTION =
  * Pass no title (Home) to restore the site defaults.
  */
 export default function usePageTitle(title, description, { noindex = false } = {}) {
+  const { pathname } = useLocation()
+
   useEffect(() => {
     document.title = title ? `${title} | PrimeFix Solutions` : DEFAULT_TITLE
 
@@ -27,5 +32,14 @@ export default function usePageTitle(title, description, { noindex = false } = {
       document.head.appendChild(robots)
     }
     robots.content = noindex ? 'noindex, follow' : 'index, follow'
-  }, [title, description, noindex])
+
+    // Keep the canonical URL in step with the current route (index.html only knows the home page).
+    let canonical = document.querySelector('link[rel="canonical"]')
+    if (!canonical) {
+      canonical = document.createElement('link')
+      canonical.rel = 'canonical'
+      document.head.appendChild(canonical)
+    }
+    canonical.href = ORIGIN + (pathname === '/' ? '' : pathname.replace(/\/+$/, ''))
+  }, [title, description, noindex, pathname])
 }

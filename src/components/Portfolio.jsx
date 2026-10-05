@@ -1,35 +1,5 @@
 import { Link } from 'react-router-dom'
-import deckImg from '../assets/portfolio-deck.webp'
-import roofImg from '../assets/portfolio-roof.webp'
-import yardImg from '../assets/portfolio-yard.webp'
-import paintingImg from '../assets/portfolio-painting.webp'
-
-const PROJECTS = [
-  {
-    img: deckImg,
-    alt: 'Newly rebuilt residential back deck with fresh wood decking and modern railing',
-    tag: 'Carpentry',
-    title: 'Back deck rebuild',
-  },
-  {
-    img: roofImg,
-    alt: 'Modern suburban home with a newly installed charcoal shingle roof',
-    tag: 'Roofing',
-    title: 'Full reshingle',
-  },
-  {
-    img: yardImg,
-    alt: 'Well-maintained residential yard with fresh mulch, trimmed shrubs, and clean landscaping',
-    tag: 'Yard & grounds',
-    title: 'Seasonal cleanup',
-  },
-  {
-    img: paintingImg,
-    alt: 'Freshly repainted modern living room with clean walls and dark trim',
-    tag: 'Painting',
-    title: 'Interior repaint',
-  },
-]
+import { FEATURED_PROJECTS as PROJECTS } from '../data/projects'
 
 export default function Portfolio() {
   return (

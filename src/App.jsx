@@ -27,6 +27,8 @@ const MaintenancePlans = lazy(pageImports.maintenance)
 const BeforeAfterPortfolio = lazy(pageImports.portfolio)
 const CostEstimator = lazy(pageImports.estimator)
 const FAQ = lazy(pageImports.faq)
+const PrivacyPolicy = lazy(pageImports.privacy)
+const Terms = lazy(pageImports.terms)
 const NotFound = lazy(pageImports.notFound)
 
 export default function App() {
@@ -101,6 +103,8 @@ export default function App() {
             <Route path="/portfolio-transformations" element={<BeforeAfterPortfolio />} />
             <Route path="/cost-estimator" element={<CostEstimator />} />
             <Route path="/faq" element={<FAQ />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<Terms />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
@@ -109,19 +113,19 @@ export default function App() {
       <Chatbot />
       <CookieConsent />
       <MobileActionBar onOpenEstimate={handleOpenEstimate} />
-     <RootContextMenu
-  holdMs={650}
-  menu={() => (
-    <MenuCard
-      logo={logoSvg}
-      title="PrimeFix Solutions"
-      items={siteMenuItems}
-      size={1.0}
-      maxWidthRem={22}
-      enableTextSelection={false}
-    />
-  )}
-/>
+      <RootContextMenu
+        holdMs={650}
+        menu={() => (
+          <MenuCard
+            logo={logoSvg}
+            title="PrimeFix Solutions"
+            items={siteMenuItems}
+            size={1.0}
+            maxWidthRem={22}
+            enableTextSelection={false}
+          />
+        )}
+      />
     </>
   )
 }

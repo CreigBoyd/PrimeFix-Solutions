@@ -10,4 +10,6 @@ export const pageImports = {
   estimator: () => import('../pages/CostEstimator'),
   faq: () => import('../pages/FAQ'),
   notFound: () => import('../pages/NotFound'),
+  privacy: () => import('../pages/Privacy'),
+  terms: () => import('../pages/Terms')
 }

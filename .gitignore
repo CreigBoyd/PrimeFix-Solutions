@@ -1,5 +1,23 @@
-node_modules
-dist
-.DS_Store
+# Dependencies & Build Output
+node_modules/
+dist/
+
+# Environment Secrets
 .env
-.vscode
+.env.local
+server/.env
+
+# Data & Storage
+server/subscribers.csv
+server/pending-reviews.json
+server/storage/ratelimit/*.json
+
+# Operating System & IDE
+.DS_Store
+.vscode/
+
+#bat files
+*.bat
+
+#custom scripts
+*.cjs

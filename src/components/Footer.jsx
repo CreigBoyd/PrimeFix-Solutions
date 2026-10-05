@@ -3,11 +3,12 @@ import logo from '../assets/primefix-solutions-logo-dark-bg.svg'
 import { SITE, telHref, mailHref } from '../config/site'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPhone, faEnvelope, faClock, faArrowUp } from '@fortawesome/free-solid-svg-icons'
-import { faFacebookF, faInstagram, faLinkedinIn, faXTwitter } from '@fortawesome/free-brands-svg-icons'
+import { faFacebookF, faInstagram, faPinterestP, faLinkedinIn, faXTwitter } from '@fortawesome/free-brands-svg-icons'
 
 const SOCIAL_DEFS = [
-  { key: 'facebook', label: 'Facebook', icon: faFacebookF },
   { key: 'instagram', label: 'Instagram', icon: faInstagram },
+  { key: 'facebook', label: 'Facebook', icon: faFacebookF },
+  { key: 'pinterest', label: 'Pinterest', icon: faPinterestP },
   { key: 'linkedin', label: 'LinkedIn', icon: faLinkedinIn },
   { key: 'x', label: 'X (Twitter)', icon: faXTwitter },
 ]
@@ -22,7 +23,7 @@ const SERVICES = [
 ]
 
 export default function Footer() {
-  const socialLinks = SOCIAL_DEFS.map((d) => ({ ...d, url: SITE.social[d.key] })).filter((d) => d.url)
+  const socialLinks = SOCIAL_DEFS.map((d) => ({ ...d, url: SITE.social?.[d.key] })).filter((d) => d.url)
   const location = useLocation()
   const navigate = useNavigate()
   const isHome = location.pathname === '/'
@@ -106,6 +107,8 @@ export default function Footer() {
               <li><Link to="/cost-estimator">Cost estimator</Link></li>
               <li><Link to="/reviews">Reviews</Link></li>
               <li><Link to="/faq">FAQ</Link></li>
+              <li><Link to="/privacy-policy">Privacy Policy</Link></li>
+              <li><Link to="/terms">Terms of Service</Link></li>
             </ul>
           </nav>
 
