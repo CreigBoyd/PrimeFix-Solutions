@@ -2,6 +2,18 @@
 import { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import ServiceModal from './ServiceModal'
+import svcCarpentry from '../assets/service-carpentry.webp'
+import svcRoofing from '../assets/service-roofing.webp'
+import svcYard from '../assets/portfolio-yard.webp'
+import svcHandyman from '../assets/service-handyman.webp'
+import svcPainting from '../assets/portfolio-painting.webp'
+import svcSeasonal from '../assets/portfolio-deck.webp'
+import svcCarpentryCard from '../assets/card-carpentry.webp'
+import svcRoofingCard from '../assets/card-roofing.webp'
+import svcYardCard from '../assets/card-yard.webp'
+import svcHandymanCard from '../assets/card-handyman.webp'
+import svcPaintingCard from '../assets/card-painting.webp'
+import svcSeasonalCard from '../assets/card-seasonal.webp'
 
 const SERVICES = [
   {
@@ -9,7 +21,8 @@ const SERVICES = [
     badge: 'Top Rated',
     desc: 'Framing, trim, and deck work built to outlast the warranty on the materials.',
     items: ['Decks & porches', 'Trim & finish carpentry', 'Framing repairs', 'Rot & structural repair'],
-    imageUrl: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&q=80&w=800',
+    imageUrl: svcCarpentryCard,
+    modalImageUrl: svcCarpentry,
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
@@ -22,7 +35,8 @@ const SERVICES = [
     badge: 'Emergency Service',
     desc: 'From one missing shingle to a full tear-off — keeping the roof doing its job.',
     items: ['Shingle repair & replacement', 'Flashing & leak repair', 'Gutter installation', 'Storm damage assessment'],
-    imageUrl: 'https://images.unsplash.com/photo-1632759145351-1d592919f522?auto=format&fit=crop&q=80&w=800',
+    imageUrl: svcRoofingCard,
+    modalImageUrl: svcRoofing,
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
@@ -35,7 +49,8 @@ const SERVICES = [
     badge: 'Seasonal Care',
     desc: 'Regular mowing and seasonal cleanups that keep a property looking cared for.',
     items: ['Mowing & trimming', 'Spring & fall cleanup', 'Mulching & bed work', 'Brush & branch clearing'],
-    imageUrl: 'https://images.unsplash.com/photo-1686663048931-6df69f577a2f?auto=format&fit=crop&q=80&w=800',
+    imageUrl: svcYardCard,
+    modalImageUrl: svcYard,
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
@@ -47,7 +62,8 @@ const SERVICES = [
     badge: 'Same-Day Repairs',
     desc: 'The punch list that never gets shorter — we knock it out in one visit.',
     items: ['Drywall & interior repair', 'Doors, locks & hardware', 'Fixture installs', 'General repairs'],
-    imageUrl: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&q=80&w=800',
+    imageUrl: svcHandymanCard,
+    modalImageUrl: svcHandyman,
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
@@ -59,7 +75,8 @@ const SERVICES = [
     badge: 'Popular',
     desc: 'Interior and exterior painting that protects the surface as much as it looks good.',
     items: ['Interior painting', 'Exterior painting & staining', 'Deck sealing', 'Trim & touch-up work'],
-    imageUrl: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&q=80&w=800',
+    imageUrl: svcPaintingCard,
+    modalImageUrl: svcPainting,
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
@@ -71,7 +88,8 @@ const SERVICES = [
     badge: 'Preventative Plan',
     desc: 'Standing appointments that catch small problems before they become big ones.',
     items: ['Gutter cleaning', 'Winterizing', 'Spring turnover', 'Snow-load roof checks'],
-    imageUrl: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&q=80&w=800',
+    imageUrl: svcSeasonalCard,
+    modalImageUrl: svcSeasonal,
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <circle cx="12" cy="12" r="10"/>

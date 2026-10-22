@@ -29,6 +29,14 @@ const CostEstimator = lazy(pageImports.estimator)
 const FAQ = lazy(pageImports.faq)
 const PrivacyPolicy = lazy(pageImports.privacy)
 const Terms = lazy(pageImports.terms)
+const ServicesHub = lazy(pageImports.servicesHub)
+const ServicePage = lazy(pageImports.servicePage)
+const AreasHub = lazy(pageImports.areasHub)
+const AreaPage = lazy(pageImports.areaPage)
+const About = lazy(pageImports.about)
+const ContactPage = lazy(pageImports.contact)
+const GuidesHub = lazy(pageImports.guidesHub)
+const GuidePage = lazy(pageImports.guidePage)
 const NotFound = lazy(pageImports.notFound)
 
 export default function App() {
@@ -105,6 +113,14 @@ export default function App() {
             <Route path="/faq" element={<FAQ />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<Terms />} />
+            <Route path="/services" element={<ServicesHub />} />
+            <Route path="/services/:slug" element={<ServicePage />} />
+            <Route path="/service-areas" element={<AreasHub />} />
+            <Route path="/service-areas/:slug" element={<AreaPage />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/guides" element={<GuidesHub />} />
+            <Route path="/guides/:slug" element={<GuidePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>

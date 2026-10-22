@@ -386,9 +386,9 @@ function BlueprintModal({ isOpen, onClose }) {
               <div className="blueprint-info-title">
                 <div className="blueprint-info-icon">{currentZoneData.icon}</div>
                 <div>
-                  <h4 style={{ fontSize: '1.2rem', color: '#fff', margin: 0, fontWeight: 700 }}>
+                  <h3 style={{ fontSize: '1.2rem', color: '#fff', margin: 0, fontWeight: 700 }}>
                     {currentZoneData.name} Optimization
-                  </h4>
+                  </h3>
                   <span style={{ fontSize: '0.8rem', color: 'var(--teal-bright, #2dd4bf)', fontWeight: 600 }}>
                     {currentZoneData.subtitle}
                   </span>

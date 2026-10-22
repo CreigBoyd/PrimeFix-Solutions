@@ -9,6 +9,13 @@ export const SITE = {
   phoneRaw: '9784172042',
   email: 'hello@PrimeFix.vip',
   hours: 'Mon–Fri 7am–6pm · Sat 8am–2pm',
+  serviceAreaLabel: 'Essex County & surrounding areas, MA',
+  // Fill in ONLY what is true. Anything left empty is simply not shown on the site.
+  credentials: {
+    hicNumber: '',      // MA Home Improvement Contractor registration number
+    csLicense: '',      // MA Construction Supervisor License number (if you hold one)
+    insurance: '',      // e.g. 'Fully insured - certificate available on request'
+  },
   social: {
     instagram: 'https://www.instagram.com/pfix.solutions/',
     facebook: 'https://www.facebook.com/PrimeFixSolutionsMA',

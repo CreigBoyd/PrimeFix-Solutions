@@ -25,7 +25,7 @@ export default function Portfolio() {
               </div>
               <div className="cap">
                 <span className="tag">{project.tag}</span>
-                <h4>{project.title}</h4>
+                <h3>{project.title}</h3>
               </div>
             </article>
           ))}

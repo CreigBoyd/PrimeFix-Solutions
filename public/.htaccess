@@ -5,18 +5,13 @@
      RewriteRule ^(.*)$ https://primefix.vip/$1 [R=301,L]
    </IfModule>
 
-# --- Single-page-app routing -------------------------------------------------
-# Client-side routes (/reviews, /faq, ...) don't exist as files, so serve
-# index.html for anything that isn't a real file or directory. Real files
-# (including /api/*.php when the PHP backend lives in /api) pass straight through.
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase /
-  RewriteRule ^index\.html$ - [L]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . /index.html [L]
-</IfModule>
+# --- Prerendered pages ---------------------------------------------------------
+# Every page is built as a real file (/services/roofing/index.html, ...). The web server serves it at /services/roofing/
+# by itself (and adds the trailing slash for you), so no rewrite rules are needed here.
+
+# Unknown URLs get a real 404 status with the branded not-found page (no more "everything returns the home page").
+ErrorDocument 404 /404.html
+Options -Indexes
 
 # --- Security headers -------------------------------------------------------------
 <IfModule mod_headers.c>
@@ -24,6 +19,7 @@
   Header always set X-Frame-Options "SAMEORIGIN"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+  Header always set Strict-Transport-Security "max-age=15552000"
 </IfModule>
 
 # --- Compression + caching ---------------------------------------------------------
@@ -36,8 +32,8 @@
   <FilesMatch "\.(js|css|webp|png|jpg|svg|woff2)$">
     ExpiresDefault "access plus 1 year"
   </FilesMatch>
-  # But never cache the entry points / service worker, or updates won't reach visitors.
-  <FilesMatch "(index\.html|sw\.js|manifest\.webmanifest|workbox-.*\.js)$">
+  # But never cache the pages, service worker or manifest, or updates won't reach visitors.
+  <FilesMatch "(index\.html|404\.html|sw\.js|manifest\.webmanifest|workbox-.*\.js)$">
     ExpiresDefault "access plus 0 seconds"
     <IfModule mod_headers.c>
       Header set Cache-Control "no-cache"

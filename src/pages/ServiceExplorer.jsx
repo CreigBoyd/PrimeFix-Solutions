@@ -257,7 +257,7 @@ export default function ServiceExplorer() {
         : `Quick Estimator (${calcQuantity} task${calcQuantity === 1 ? '' : 's'})`
 
       const messageContent = [
-        `Estimated Price Range: $${lowEnd.toLocaleString()} – $${highEnd.toLocaleString()}`,
+        `Estimated Price Range: $${lowEnd.toLocaleString('en-US')} – $${highEnd.toLocaleString('en-US')}`,
         selectedTasks.length > 0 ? `Selected Tasks:\n${selectedTasks.map(t => `• ${t}`).join('\n')}` : null,
         contactInfo.notes ? `Additional Notes:\n${contactInfo.notes}` : null
       ].filter(Boolean).join('\n\n')
@@ -425,7 +425,7 @@ export default function ServiceExplorer() {
                 <div className="se-sticky-info">
                   <span className="se-sticky-count">{selectedTasks.length} task{selectedTasks.length === 1 ? '' : 's'} selected in your checklist</span>
                   <div className="se-sticky-price">
-                    Est. ${lowEnd.toLocaleString()} –${highEnd.toLocaleString()}
+                    Est. ${lowEnd.toLocaleString('en-US')} –${highEnd.toLocaleString('en-US')}
                   </div>
                 </div>
 
@@ -486,7 +486,7 @@ export default function ServiceExplorer() {
             <div style={{ background: 'linear-gradient(135deg, rgba(18,128,119,0.15), rgba(14,90,84,0.3))', border: '2px solid var(--teal)', borderRadius: '14px', padding: '28px', textAlign: 'center', marginBottom: '32px' }}>
               <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--teal-bright)', fontWeight: 700 }}>Combined Service Estimate</span>
               <div style={{ fontSize: '2.5rem', fontWeight: 900, color: '#fff', margin: '8px 0' }}>
-                ${lowEnd.toLocaleString()} –${highEnd.toLocaleString()}
+                ${lowEnd.toLocaleString('en-US')} –${highEnd.toLocaleString('en-US')}
               </div>
               <p style={{ fontSize: '0.82rem', color: 'var(--text-soft)', margin: 0 }}>
                 Includes standard trip, tools, and labor for {calcQuantity} handyman tasks.

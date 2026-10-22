@@ -1,29 +1,18 @@
-import heroImg from '../assets/primefix-hero.webp'
-import heroPoster from '../assets/hero-poster.jpg'
+import heroSmall from '../assets/hero-renovation-480.webp'
+import heroLarge from '../assets/hero-renovation-863.webp'
+import './hero.css'
+
+// Keep in sync with the preload tag that scripts/prerender.mjs writes for the home page.
+export const HERO_SIZES = '(max-width: 900px) 92vw, 520px'
 
 export default function Hero() {
   return (
     <section className="hero">
-      {/* Background Video Layer */}
-      <video 
-        className="hero-bg-video" 
-        autoPlay 
-        loop 
-        muted 
-        playsInline 
-        poster={heroPoster}
-      >
-        <source src="/videos/bhero.mp4" type="video/mp4" />
-      </video>
-
-      {/* Dark Overlay Layer */}
-      <div className="hero-bg-overlay"></div>
-
       {/* Foreground Content (Text, CTAs, Stats, Image) */}
       <div className="hero-content">
         <div className="hero-blob one"></div>
         <div className="hero-blob two"></div>
-        
+
         <div className="wrap hero-grid">
           <div>
             <span className="kicker">Full-service, one crew</span>
@@ -45,15 +34,21 @@ export default function Hero() {
           </div>
 
           <div className="hero-image-wrap">
-            <img
-              src={heroImg}
-              alt="PrimeFix Solutions technician holding a wrench and toolbox"
-              width="470"
-              height="960"
-              loading="eager"
-              fetchpriority="high"
-              decoding="async"
-            />
+            <div className="hero-frame">
+              <img
+                src={heroLarge}
+                srcSet={`${heroSmall} 480w, ${heroLarge} 863w`}
+                sizes={HERO_SIZES}
+                alt="Split view of the same room before and after renovation: worn bare floor and plain walls on the left, finished hardwood floor and painted walls and trim on the right"
+                width="863"
+                height="581"
+                loading="eager"
+                fetchpriority="high"
+                decoding="async"
+              />
+              <span className="hero-tag before" aria-hidden="true">Before</span>
+              <span className="hero-tag after" aria-hidden="true">After</span>
+            </div>
           </div>
         </div>
       </div>

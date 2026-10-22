@@ -8,8 +8,9 @@
     "dev": "vite --open",
     "dev:php": "php -S localhost:8000 -t server",
     "dev:all": "concurrently -k -n WEB,API -c cyan,magenta \"npm:dev\" \"npm:dev:php\"",
-    "build": "vite build",
-    "preview": "vite preview",
+    "prebuild": "node scripts/generate-sitemap.mjs",
+    "build": "vite build && vite build --ssr src/entry-server.jsx --outDir dist-ssr && node scripts/prerender.mjs",
+    "preview": "node scripts/serve-dist.mjs",
     "backup": "node transfer.cjs"
   },
   "dependencies": {

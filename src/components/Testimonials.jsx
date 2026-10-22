@@ -5,6 +5,8 @@ import reviews from '../data/reviews.json'
 const FEATURED = reviews.filter((r) => r.featured)
 
 export default function Testimonials() {
+  if (FEATURED.length === 0) return null // nothing to show yet
+
   return (
     <section id="testimonials" className="band">
 

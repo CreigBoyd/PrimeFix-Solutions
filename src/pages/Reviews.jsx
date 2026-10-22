@@ -7,7 +7,7 @@ import reviews from '../data/reviews.json';
 import usePageTitle from '../hooks/usePageTitle';
 
 function formatDate(iso) {
-  return new Date(iso).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  return new Date(iso).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 }
 
 export default function Reviews() {
@@ -32,28 +32,27 @@ export default function Reviews() {
 
       <section className="reviews-page">
         <div className="wrap">
-          {/* Breadcrumb Home Link */}
-          <div className="rev-top-nav-bar">
-            <Link to="/" className="rev-home-link">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M19 12H5M12 19l-7-7 7-7"/>
-              </svg>
-              <span>Back to Home</span>
-            </Link>
-          </div>
-
-          <div className="section-head center">
+         
+         <div className="section-head center">
             <span className="kicker">Reviews</span>
             <h1>What customers say.</h1>
-            <p>Real feedback from real jobs — the good, and the occasional four-star.</p>
+            <p>{count > 0 ? 'Real feedback from real jobs — the good, and the occasional four-star.' : 'Reviews from our customers will appear here.'}</p>
           </div>
 
           <div className="reviews-summary">
-            <div className="reviews-summary-score">{average.toFixed(1)}</div>
-            <div>
-              <StarRating value={Math.round(average)} size={22} />
-              <p>{count} review{count === 1 ? '' : 's'}</p>
-            </div>
+            {count > 0 ? (
+              <>
+                <div className="reviews-summary-score">{average.toFixed(1)}</div>
+                <div>
+                  <StarRating value={Math.round(average)} size={22} />
+                  <p>{count} review{count === 1 ? '' : 's'}</p>
+                </div>
+              </>
+            ) : (
+              <div>
+                <p>No reviews yet. Worked with us? We would love to hear how it went.</p>
+              </div>
+            )}
             <button className="btn btn-primary" onClick={() => setModalOpen(true)}>
               Leave a review
             </button>

@@ -86,7 +86,7 @@ export default function CostEstimator() {
         message: [
           `Service: ${selectedService}`,
           `Quantity: ${quantity} ${config.unit || ''}`.trim(),
-          `Estimated range shown: $${lowEnd.toLocaleString()} – $${highEnd.toLocaleString()}`,
+          `Estimated range shown: $${lowEnd.toLocaleString('en-US')} – $${highEnd.toLocaleString('en-US')}`,
         ].join('\n'),
       })
       setSubmitted(true)
@@ -168,7 +168,7 @@ export default function CostEstimator() {
             <div style={{ background: 'linear-gradient(135deg, rgba(18,128,119,0.15), rgba(14,90,84,0.3))', border: '2px solid var(--teal)', borderRadius: '14px', padding: '28px', textAlign: 'center', marginBottom: '32px' }}>
               <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--teal-bright)', fontWeight: 700 }}>Estimated Investment Range</span>
               <div style={{ fontSize: '2.5rem', fontWeight: 900, color: '#fff', margin: '8px 0' }}>
-                ${lowEnd.toLocaleString()} –${highEnd.toLocaleString()}
+                ${lowEnd.toLocaleString('en-US')} –${highEnd.toLocaleString('en-US')}
               </div>
               <p style={{ fontSize: '0.82rem', color: 'var(--text-soft)', maxWidth: '500px', margin: '0 auto' }}>
                 *This is an automated ballpark estimate based on standard averages. Final on-site quotes are always 100% free and customized to your specific property.
@@ -232,7 +232,7 @@ export default function CostEstimator() {
           <div style={{ textAlign: 'center', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '20px', padding: '48px', maxWidth: '600px', margin: '0 auto' }}>
             <h3 style={{ fontSize: '1.8rem', color: 'var(--teal-bright)', marginBottom: '16px' }}>Estimate Saved! 🎉</h3>
             <p style={{ fontSize: '1rem', color: 'var(--text-soft)', lineHeight: 1.6, marginBottom: '24px' }}>
-              Thanks <strong>{contactInfo.name}</strong>! We've recorded your estimate for <strong>{selectedService}</strong> (${lowEnd.toLocaleString()} –${highEnd.toLocaleString()}). We will reach out to <strong>{contactInfo.phone}</strong> shortly to confirm a time for our free on-site walkthrough.
+              Thanks <strong>{contactInfo.name}</strong>! We've recorded your estimate for <strong>{selectedService}</strong> (${lowEnd.toLocaleString('en-US')} –${highEnd.toLocaleString('en-US')}). We will reach out to <strong>{contactInfo.phone}</strong> shortly to confirm a time for our free on-site walkthrough.
             </p>
             <button
               type="button"

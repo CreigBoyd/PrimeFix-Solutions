@@ -1,5 +1,8 @@
 // src/components/ServiceModal.jsx
 import React, { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { SERVICES as SERVICE_PAGES } from '../data/serviceContent'
+import defaultModalImage from '../assets/service-handyman.webp'
 
 export default function ServiceModal({
   service = null,
@@ -65,7 +68,8 @@ export default function ServiceModal({
     title = 'Commercial & Residential Painting',
     badge = 'Popular',
     desc = 'Full interior and exterior painting services for homes and commercial buildings.',
-    imageUrl = 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&q=80&w=800',
+    imageUrl = defaultModalImage,
+    modalImageUrl,
     items = [],
     ctaText = 'Get Free Estimate'
   } = activeService || {}
@@ -94,7 +98,7 @@ export default function ServiceModal({
       <div className="primefix-3d-modal" onClick={(e) => e.stopPropagation()}>
         <div
           className="primefix-modal-left"
-          style={{ backgroundImage: `url(${imageUrl})` }}
+          style={{ backgroundImage: `url(${modalImageUrl || imageUrl})` }}
         >
           {badge && <div className="primefix-modal-badge">{badge}</div>}
         </div>
@@ -134,6 +138,17 @@ export default function ServiceModal({
             >
               {ctaText}
             </button>
+            {(() => {
+              const page = SERVICE_PAGES.find((s) => s.name === renderService?.title)
+              return page ? (
+                <Link
+                  to={`/services/${page.slug}`}
+                  style={{ display: 'block', textAlign: 'center', marginTop: 12, color: 'var(--teal-bright)', fontWeight: 600 }}
+                >
+                  See the full {page.name.toLowerCase()} page &rarr;
+                </Link>
+              ) : null
+            })()}
           </div>
         </div>
       </div>

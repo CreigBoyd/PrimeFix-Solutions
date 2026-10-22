@@ -605,7 +605,7 @@ export default function Contact() {
               </div>
             ) : (
               <div style={{ textAlign: 'center', padding: '24px 0' }}>
-                <h4 style={{ fontSize: '1.5rem', color: 'var(--teal-bright, #2dd4bf)', marginBottom: '12px' }}>Request Received! 🎉</h4>
+                <h3 style={{ fontSize: '1.5rem', color: 'var(--teal-bright, #2dd4bf)', marginBottom: '12px' }}>Request Received! 🎉</h3>
                 <p style={{ fontSize: '0.95rem', color: 'var(--text-soft)', lineHeight: 1.5, marginBottom: '24px' }}>
                   We've received your request for <strong>{selectedDate}</strong> between <strong>{selectedSlot}</strong>. We'll call or text <strong>{bookingPhone}</strong> to confirm your appointment.
                 </p>

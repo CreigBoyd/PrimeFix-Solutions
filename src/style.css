@@ -133,6 +133,12 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Pop-ups lock the page by setting body { overflow: hidden }, but the html/body overflow-x rules stop that from locking
+   the page itself. This makes the lock work (mouse wheel, touch and keyboard) while a pop-up is open. */
+html:has(body[style*="overflow: hidden"]) {
+  overflow: hidden;
+}
+
 * {
   box-sizing: inherit;
 }
@@ -188,7 +194,7 @@ a {
 .kicker {
   font-size: 0.86rem;
   font-weight: 700;
-  color: var(--teal-bright);
+  color: #2bb5a6;
   display: flex;
   align-items: center;
   gap: 9px;
@@ -823,12 +829,12 @@ section {
 .portfolio-card .cap .tag {
   font-size: 0.78rem;
   font-weight: 700;
-  color: var(--teal-bright);
+  color: #2bb5a6;
   display: block;
   margin-bottom: 4px;
 }
 
-.portfolio-card .cap h4 {
+.portfolio-card .cap h3 {
   font-size: 1.04rem;
   font-weight: 600;
   font-family: 'Public Sans', sans-serif;
@@ -1272,7 +1278,7 @@ footer.site::after {
 }
 
 /* Link columns */
-.footer-col h5 {
+.footer-col h3 {
   margin: 0 0 18px;
   font-family: 'Public Sans', sans-serif;
   font-size: 0.74rem;
@@ -3024,6 +3030,12 @@ footer.site::after {
   padding: 0 2px;
   cursor: pointer;
   transition: color 0.15s ease;
+  /* at least 24x24px so it is easy to tap */
+  min-width: 24px;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .dismiss-teaser-btn:hover {
@@ -3202,7 +3214,7 @@ footer.site::after {
         .service-card-interactive:hover .service-card-image-wrap img { transform: scale(1.05); }
         .service-card-content { padding: 24px; display: flex; flex-direction: column; flex-grow: 1; }
         .service-card-interactive:hover { transform: translateY(-4px); border-color: var(--teal-bright); box-shadow: 0 20px 40px rgba(14, 42, 56, 0.14); }
-        .service-card-action { margin-top: 14px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; font-weight: 700; color: var(--teal-deep); background: none; border: none; padding: 0; transition: gap 0.2s ease, color 0.2s ease; }
+        .service-card-action { margin-top: 14px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; font-weight: 700; color: #3fc9b9; background: none; border: none; padding: 0; transition: gap 0.2s ease, color 0.2s ease; }
         :root[data-theme="dark"] .service-card-action { color: var(--teal-bright); }
         .service-card-interactive:hover .service-card-action { gap: 10px; }
         

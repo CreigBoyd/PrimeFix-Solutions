@@ -1,8 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { getConsent, setConsent } from '../utils/analytics'
 
 export default function CookieConsent() {
-  const [visible, setVisible] = useState(() => getConsent() === null)
+  // Start hidden so the prerendered HTML and the browser's first render are identical for every visitor
+  // (a saved choice lives in the browser, which the server cannot see). Show the banner right after load
+  // if the visitor has not chosen yet.
+  const [visible, setVisible] = useState(false)
+  useEffect(() => {
+    if (getConsent() === null) setVisible(true)
+  }, [])
   if (!visible) return null
 
   const choose = (value) => {

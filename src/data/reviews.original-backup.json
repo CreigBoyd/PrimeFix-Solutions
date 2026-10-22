@@ -1,0 +1,62 @@
+[
+  {
+    "id": "karen-m",
+    "name": "Karen M.",
+    "role": "Homeowner",
+    "service": "Carpentry",
+    "rating": 5,
+    "date": "2026-06-02",
+    "quote": "PrimeFix rebuilt our back deck in under a week, and it's better built than the original ever was.",
+    "featured": true
+  },
+  {
+    "id": "dave-r",
+    "name": "Dave R.",
+    "role": "Homeowner",
+    "service": "Roofing",
+    "rating": 5,
+    "date": "2026-05-18",
+    "quote": "Called about a roof leak on a Sunday and had someone out by Tuesday. Fixed right the first time.",
+    "featured": true
+  },
+  {
+    "id": "priya-s",
+    "name": "Priya S.",
+    "role": "Property Manager",
+    "service": "Handyman & repairs",
+    "rating": 5,
+    "date": "2026-04-27",
+    "quote": "They handle everything now — yard work, repairs, painting, the works. One call and it's done.",
+    "featured": true
+  },
+  {
+    "id": "marcus-t",
+    "name": "Marcus T.",
+    "role": "Homeowner",
+    "service": "Painting & finishing",
+    "rating": 5,
+    "date": "2026-03-14",
+    "quote": "Repainted the whole first floor in two days and left the place cleaner than when they arrived. Color match on the trim was perfect.",
+    "featured": false
+  },
+  {
+    "id": "linda-w",
+    "name": "Linda W.",
+    "role": "Homeowner",
+    "service": "Yard & grounds",
+    "rating": 4,
+    "date": "2026-02-22",
+    "quote": "Great seasonal cleanup crew — very thorough. Only reason it's not five stars is scheduling took a bit longer than expected during their busy season.",
+    "featured": false
+  },
+  {
+    "id": "omar-h",
+    "name": "Omar H.",
+    "role": "Property Manager",
+    "service": "Seasonal upkeep",
+    "rating": 5,
+    "date": "2026-01-09",
+    "quote": "Switched all 12 of our rental units to PrimeFix for gutter cleaning and winterizing. Zero missed appointments all season.",
+    "featured": false
+  }
+]

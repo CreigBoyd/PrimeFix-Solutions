@@ -1,4 +1,7 @@
-import { useEffect, useRef, useState, useLayoutEffect } from 'react'
+import { useEffect, useRef, useState, useLayoutEffect as useReactLayoutEffect } from 'react'
+
+// useLayoutEffect warns during prerendering (Node); fall back to useEffect there.
+const useLayoutEffect = typeof window !== 'undefined' ? useReactLayoutEffect : useEffect
 import styled from 'styled-components'
 import { pointFromEvent, isWithinRef, isWithinAnyRef } from './helpers'
 

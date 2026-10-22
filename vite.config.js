@@ -3,13 +3,14 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-export default defineConfig({
+export default defineConfig(({ isSsrBuild }) => ({
+  ssr: { noExternal: true },
   plugins: [
     react(),
-    VitePWA({
+    !isSsrBuild && VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: false,
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'robots.txt'],
-      // The plugin generates /manifest.webmanifest and injects the <link> tag.
       manifest: {
         name: 'PrimeFix Solutions',
         short_name: 'PrimeFix',
@@ -25,9 +26,8 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Precache only the app shell. Photos are large, so they're cached on first use instead.
         globPatterns: ['**/*.{js,css,html,ico,svg,woff2}', 'android-chrome-*.png', 'apple-touch-icon.png', 'favicon-*.png'],
-        // Don't let the SPA fallback swallow the API or plain static files.
+        navigateFallback: null,
         navigateFallbackDenylist: [/^\/api\//, /\.(?:xml|txt|vcf)$/],
         runtimeCaching: [
           {
@@ -44,7 +44,6 @@ export default defineConfig({
     }),
   ],
   server: {
-    // Local dev: /api/* -> PHP built-in server (npm run dev:php)
     proxy: {
       '/api': {
         target: 'http://localhost:8000',
@@ -54,7 +53,14 @@ export default defineConfig({
     },
   },
   build: {
+    cssCodeSplit: false,
     chunkSizeWarningLimit: 600,
+    modulePreload: {
+      // Prevents automatic preload generation for non-essential assets
+      filter(filename) {
+        return !filename.endsWith('.woff2')
+      },
+    },
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -72,4 +78,4 @@ export default defineConfig({
       },
     },
   },
-})
+}))

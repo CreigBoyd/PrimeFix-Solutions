@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { SERVICES as SERVICE_PAGES } from '../data/serviceContent'
 import logo from '../assets/primefix-solutions-logo-dark-bg.svg'
 import { SITE, telHref, mailHref } from '../config/site'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -13,14 +14,7 @@ const SOCIAL_DEFS = [
   { key: 'x', label: 'X (Twitter)', icon: faXTwitter },
 ]
 
-const SERVICES = [
-  'Carpentry',
-  'Roofing',
-  'Yard & grounds',
-  'Handyman & repairs',
-  'Painting & finishing',
-  'Seasonal upkeep',
-]
+const SERVICES = SERVICE_PAGES
 
 export default function Footer() {
   const socialLinks = SOCIAL_DEFS.map((d) => ({ ...d, url: SITE.social?.[d.key] })).filter((d) => d.url)
@@ -88,23 +82,27 @@ export default function Footer() {
           </div>
 
           <div className="footer-col">
-            <h5>Services</h5>
+            <h3>Services</h3>
             <ul>
-              {SERVICES.map((name) => (
-                <li key={name}>
-                  <a href="#services" onClick={(e) => handleNavClick(e, '#services')}>{name}</a>
+              {SERVICES.map((svc) => (
+                <li key={svc.slug}>
+                  <Link to={`/services/${svc.slug}`}>{svc.name}</Link>
                 </li>
               ))}
             </ul>
           </div>
 
           <nav className="footer-col" aria-label="Explore">
-            <h5>Explore</h5>
+            <h3>Explore</h3>
             <ul>
               <li><a href="#portfolio" onClick={(e) => handleNavClick(e, '#portfolio')}>Recent work</a></li>
               <li><Link to="/portfolio-transformations">Before &amp; after</Link></li>
               <li><Link to="/maintenance-plans">Maintenance plans</Link></li>
               <li><Link to="/cost-estimator">Cost estimator</Link></li>
+              <li><Link to="/service-areas">Service areas</Link></li>
+              <li><Link to="/guides">Guides</Link></li>
+              <li><Link to="/about">About us</Link></li>
+              <li><Link to="/contact">Contact</Link></li>
               <li><Link to="/reviews">Reviews</Link></li>
               <li><Link to="/faq">FAQ</Link></li>
               <li><Link to="/privacy-policy">Privacy Policy</Link></li>
@@ -113,7 +111,7 @@ export default function Footer() {
           </nav>
 
           <div className="footer-col footer-contact">
-            <h5>Get in touch</h5>
+            <h3>Get in touch</h3>
             <ul>
               <li>
                 <FontAwesomeIcon icon={faPhone} className="footer-ico" />
@@ -139,7 +137,7 @@ export default function Footer() {
         </div>
 
         <div className="footer-bottom">
-          <span>© {new Date().getFullYear()} PrimeFix Solutions. Licensed &amp; insured — license # on request.</span>
+          <span suppressHydrationWarning>© {new Date().getFullYear()} PrimeFix Solutions. Licensed &amp; insured — license # on request.</span>
           <button type="button" className="footer-top-btn" onClick={scrollTop}>
             Back to top <FontAwesomeIcon icon={faArrowUp} />
           </button>

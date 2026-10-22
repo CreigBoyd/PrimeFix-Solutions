@@ -3,6 +3,9 @@ import { useLocation } from 'react-router-dom'
 
 const ORIGIN = 'https://primefix.vip'
 
+// Pages live at /services/roofing/ (with the trailing slash); the home page is just the domain.
+const canonicalFor = (pathname) => ORIGIN + (pathname === '/' ? '' : pathname.replace(/\/+$/, '') + '/')
+
 export const DEFAULT_TITLE = 'Prime Fix Solutions | Professional Handyman & Home Maintenance'
 export const DEFAULT_DESCRIPTION =
   'Reliable carpentry, roofing, painting, handyman, and seasonal upkeep services. Licensed, insured, and serving your local area with free estimates.'
@@ -13,6 +16,15 @@ export const DEFAULT_DESCRIPTION =
  */
 export default function usePageTitle(title, description, { noindex = false } = {}) {
   const { pathname } = useLocation()
+
+  // Prerender (Node): there is no document, so hand the values to scripts/prerender.mjs.
+  if (typeof document === 'undefined') {
+    const seo = (globalThis.__SEO__ = globalThis.__SEO__ || { jsonLd: [] })
+    seo.title = title ? `${title} | PrimeFix Solutions` : DEFAULT_TITLE
+    seo.description = description || DEFAULT_DESCRIPTION
+    seo.noindex = noindex
+    seo.canonical = canonicalFor(pathname)
+  }
 
   useEffect(() => {
     document.title = title ? `${title} | PrimeFix Solutions` : DEFAULT_TITLE
@@ -40,6 +52,6 @@ export default function usePageTitle(title, description, { noindex = false } = {
       canonical.rel = 'canonical'
       document.head.appendChild(canonical)
     }
-    canonical.href = ORIGIN + (pathname === '/' ? '' : pathname.replace(/\/+$/, ''))
+    canonical.href = canonicalFor(pathname)
   }, [title, description, noindex, pathname])
 }

@@ -37,3 +37,16 @@ Redirect HTTP to HTTPS at your host/CDN.
 - [ ] Revoke the old Gmail app password that was in the earlier `config.php`
 - [ ] Send a test of every form on the live site and confirm the emails arrive
 - [ ] Submit `https://yourdomain.com/sitemap.xml` to Google Search Console
+
+## How the build works (prerendering)
+
+`npm run build` now does four things: regenerates `public/sitemap.xml`, builds the site, builds a server copy, and
+**prerenders every page to real HTML** (`dist/services/roofing/index.html`, ...). Google and link previews see full content
+without running JavaScript; the browser then takes over seamlessly.
+
+- Add a service / town / guide by editing `src/data/serviceContent.js`, `areas.js` or `guides.js`. Pages, sitemap and
+  prerendering update automatically.
+- Add a brand-new static page: create it, add the route in `src/App.jsx` and `src/routes/pageRegistry.js`,
+  add it to `scripts/routes.mjs`, and (for hydration) to `chunkForPath` in `src/main.jsx`.
+- `npm run preview` serves `dist/` the way Apache will (use this, not `vite preview`).
+- `public/.htaccess` serves each page at its clean URL and returns a real 404 for unknown URLs.

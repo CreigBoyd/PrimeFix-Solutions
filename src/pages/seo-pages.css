@@ -1,0 +1,77 @@
+/* Service, area, About and Contact pages. Uses the site's existing colour tokens. */
+.lp-page { padding: 3rem 1rem 5rem; background: var(--bg); }
+.lp-contact-top { padding-bottom: 1rem; }
+.lp-wrap { max-width: 960px; }
+
+.lp-crumbs { font-size: 0.85rem; color: var(--text-soft); margin-bottom: 1.5rem; }
+.lp-crumbs a { color: var(--text-soft); text-decoration: none; }
+.lp-crumbs a:hover { color: var(--text); }
+
+.lp-header h1 {
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: clamp(2rem, 5vw, 2.9rem);
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--text);
+  margin: 0.5rem 0 1rem;
+}
+.lp-lead { font-size: 1.1rem; line-height: 1.7; color: var(--text-soft); max-width: 62ch; margin: 0 0 2rem; }
+
+.lp-block { padding: 1.75rem 0; border-top: 1px solid var(--border); }
+.lp-block h2 { font-size: 1.3rem; color: var(--text); margin: 0 0 0.9rem; }
+.lp-block p { color: var(--text-soft); line-height: 1.7; }
+.lp-muted { color: var(--text-soft); }
+.lp-after { margin-top: 1.5rem; }
+.lp-after a, .lp-block a { color: var(--teal-bright); }
+
+.lp-two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 2.5rem; }
+@media (max-width: 760px) { .lp-two { grid-template-columns: 1fr; } }
+
+.lp-list { padding-left: 1.2rem; margin: 0; }
+.lp-list li { color: var(--text-soft); line-height: 1.65; margin-bottom: 0.5rem; }
+.lp-list strong { color: var(--text); }
+
+.lp-faq details { border: 1px solid var(--border); border-radius: 10px; background: var(--bg-card); margin-bottom: 0.75rem; }
+.lp-faq summary { cursor: pointer; padding: 1rem 1.1rem; font-weight: 600; color: var(--text); list-style-position: inside; }
+.lp-faq details[open] summary { border-bottom: 1px solid var(--border); }
+.lp-faq p { margin: 0; padding: 1rem 1.1rem 1.1rem; }
+
+.lp-chips { list-style: none; display: flex; flex-wrap: wrap; gap: 0.6rem; padding: 0; margin: 0.75rem 0 0; }
+.lp-chips a {
+  display: inline-block; padding: 0.45rem 0.95rem; border: 1px solid var(--border); border-radius: 999px;
+  color: var(--text); text-decoration: none; background: var(--bg-card);
+}
+.lp-chips a:hover { border-color: var(--teal-bright); color: var(--teal-bright); }
+
+.lp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+.lp-card {
+  display: block; padding: 1.25rem; border: 1px solid var(--border); border-radius: 12px;
+  background: var(--bg-card); text-decoration: none; transition: border-color 0.2s, transform 0.2s;
+}
+.lp-card:hover { border-color: var(--teal-bright); transform: translateY(-2px); }
+.lp-card h3 { color: var(--text); margin: 0 0 0.4rem; font-size: 1.1rem; }
+.lp-card p { color: var(--text-soft); margin: 0; font-size: 0.93rem; line-height: 1.55; }
+
+.lp-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 0; }
+.lp-facts dt { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-soft); }
+.lp-facts dd { margin: 0.2rem 0 0; color: var(--text); font-weight: 500; }
+.lp-facts a { color: var(--teal-bright); text-decoration: none; }
+
+.lp-owner { display: flex; gap: 1.5rem; align-items: flex-start; }
+.lp-owner img { width: 140px; height: 140px; object-fit: cover; border-radius: 12px; flex-shrink: 0; }
+@media (max-width: 600px) { .lp-owner { flex-direction: column; } }
+
+.lp-cta {
+  margin-top: 2.5rem; padding: 2rem; border-radius: 14px; text-align: center;
+  border: 1px solid var(--border); background: var(--bg-card);
+}
+.lp-cta h2 { color: var(--text); margin: 0 0 0.5rem; }
+.lp-cta p { color: var(--text-soft); max-width: 52ch; margin: 0 auto 1.25rem; }
+.lp-cta-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+
+.lp-header-photo { display: grid; grid-template-columns: 1.15fr 1fr; gap: 2rem; align-items: center; margin-bottom: 1rem; }
+.lp-header-photo img { width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--border); aspect-ratio: 16 / 10; object-fit: cover; }
+@media (max-width: 800px) { .lp-header-photo { grid-template-columns: 1fr; } }
+
+.lp-chips-center { justify-content: center; }
+.lp-home-sub { text-align: center; color: var(--text-soft); margin: 2rem 0 0.25rem; font-size: 0.95rem; }

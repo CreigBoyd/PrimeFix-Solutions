@@ -11,5 +11,13 @@ export const pageImports = {
   faq: () => import('../pages/FAQ'),
   notFound: () => import('../pages/NotFound'),
   privacy: () => import('../pages/Privacy'),
-  terms: () => import('../pages/Terms')
+  terms: () => import('../pages/Terms'),
+  servicesHub: () => import('../pages/ServicesHub'),
+  servicePage: () => import('../pages/ServicePage'),
+  areasHub: () => import('../pages/AreasHub'),
+  areaPage: () => import('../pages/AreaPage'),
+  about: () => import('../pages/About'),
+  contact: () => import('../pages/ContactPage'),
+  guidesHub: () => import('../pages/GuidesHub'),
+  guidePage: () => import('../pages/GuidePage')
 }

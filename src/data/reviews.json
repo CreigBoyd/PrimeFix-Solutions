@@ -58,5 +58,15 @@
     "date": "2026-01-09",
     "quote": "Switched all 12 of our rental units to PrimeFix for gutter cleaning and winterizing. Zero missed appointments all season.",
     "featured": false
-  }
+  },
+  {
+    "id": "creig-l-boyd-261018",
+    "name": "creig L boyd",
+    "role": "Customer",
+    "service": "Carpentry",
+    "rating": 5,
+    "date": "2026-10-18",
+    "quote": "Every bit of professional",
+    "featured": false
+}
 ]

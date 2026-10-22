@@ -10,7 +10,8 @@ const NAV_GROUPS = [
   {
     label: 'Services & Process',
     items: [
-      { label: 'Our Services', href: '#services', isAnchor: true },
+      { label: 'Our Services', href: '/services', isAnchor: false, importKey: 'servicesHub' },
+      { label: 'Service Areas', href: '/service-areas', isAnchor: false, importKey: 'areasHub' },
       { label: 'How We Work', href: '#process', isAnchor: true },
     ],
   },
@@ -24,8 +25,10 @@ const NAV_GROUPS = [
   {
     label: 'Help & Contact',
     items: [
+      { label: 'Guides', href: '/guides', isAnchor: false, importKey: 'guidesHub' },
       { label: 'FAQ', href: '/faq', isAnchor: false, importKey: 'faq' },
-      { label: 'Contact Us', href: '#contact', isAnchor: true },
+      { label: 'About Us', href: '/about', isAnchor: false, importKey: 'about' },
+      { label: 'Contact Us', href: '/contact', isAnchor: false, importKey: 'contact' },
     ],
   },
 ]
